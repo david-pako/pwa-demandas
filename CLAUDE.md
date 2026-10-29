@@ -71,7 +71,23 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
   em `https://david-pako.github.io/pwa-demandas/` (subpasta, não raiz do domínio).
 - Cada tarefa recebe um `id` interno gerado no aparelho. O JSON importado não precisa ter `id`.
 - Ao mudar arquivos do app, **incrementar a versão do cache** no `sw.js` para os aparelhos
-  receberem a atualização.
+  receberem a atualização. Arquivo novo do app precisa entrar na lista `ARQUIVOS` do `sw.js`.
+- Armazenamento: **localStorage**, chave `demandas.tarefas`. Código separado em `dados.js`
+  (leitura, gravação e validação) e `app.js` (tela), usando módulos ES nativos.
+- Textos das tarefas entram na tela só com `textContent`, nunca com `innerHTML`.
+
+## Regras de comportamento
+
+- Resumo (soma as duas abas): **para fazer** = abertas com tag diferente de `wait`;
+  **aguardando** = abertas com tag `wait`; **concluídas** = status `feito`.
+- Tarefas fechadas (`feito` ou `encerrado`) ficam recolhidas no fim de cada grupo.
+- O campo rápido cria a tarefa na aba aberta, no grupo **"Entrada"** (exibido sempre primeiro),
+  com tag `next` e status `aberto`.
+- Ao mudar de aba ou de grupo na edição, a tarefa vai para o fim do grupo novo.
+- Importar **substitui** todas as tarefas do aparelho, após confirmação. Se qualquer item for
+  inválido, nada é importado e os erros são mostrados. Campos opcionais ausentes recebem padrão.
+- Exportar gera `demandas-AAAA-MM-DD.json` sem o `id` interno.
+- Arquivo de exemplo para testar importação: `exemplos/tarefas-exemplo.json` (dados fictícios).
 
 ## Publicação
 
