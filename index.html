@@ -53,7 +53,9 @@
         <button type="button" id="botao-exportar">Exportar JSON</button>
         <button type="button" id="botao-importar">Importar JSON</button>
       </div>
-      <input type="file" id="arquivo-importar" accept="application/json,.json" hidden>
+      <!-- Sem "accept": no Android esse filtro costuma bloquear arquivos .json válidos.
+           O conteúdo é conferido pelo app na importação. -->
+      <input type="file" id="arquivo-importar" hidden>
     </footer>
   </main>
 
