@@ -1,4 +1,4 @@
-import { carregar, salvar, novaTarefa, TAGS } from './dados.js';
+import { carregar, salvar, novaTarefa, paraExportar, validarLista, TAGS } from './dados.js';
 
 // ---------- Estado ----------
 const CHAVE_ABA = 'demandas.aba';
@@ -208,6 +208,52 @@ document.getElementById('botao-excluir').addEventListener('click', () => {
   if (!confirm(`Excluir "${emEdicao.titulo}"? Não dá para desfazer.`)) return;
   tarefas = tarefas.filter((t) => t !== emEdicao);
   dialogo.close();
+  atualizar();
+});
+
+// ---------- Exportar e importar ----------
+document.getElementById('botao-exportar').addEventListener('click', () => {
+  const json = JSON.stringify(paraExportar(tarefas), null, 2);
+  const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  const hoje = new Date().toLocaleDateString('sv-SE'); // formato AAAA-MM-DD na data local
+  el('a', { href: url, download: `demandas-${hoje}.json` }).click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+const arquivoImportar = document.getElementById('arquivo-importar');
+document.getElementById('botao-importar').addEventListener('click', () => arquivoImportar.click());
+
+arquivoImportar.addEventListener('change', async () => {
+  const arquivo = arquivoImportar.files[0];
+  if (!arquivo) return;
+  let texto;
+  try {
+    texto = await arquivo.text();
+  } finally {
+    arquivoImportar.value = ''; // permite escolher o mesmo arquivo de novo
+  }
+
+  let dados;
+  try {
+    dados = JSON.parse(texto.replace(/^﻿/, '')); // ignora o BOM que alguns editores colocam
+  } catch {
+    alert('Não consegui ler o arquivo: ele não é um JSON válido.');
+    return;
+  }
+
+  const { tarefas: importadas, erros } = validarLista(dados);
+  if (erros.length > 0) {
+    const resumo = erros.slice(0, 5).join('\n') + (erros.length > 5 ? `\n… e mais ${erros.length - 5}.` : '');
+    alert(`Nada foi importado. O arquivo tem ${erros.length} problema(s):\n\n${resumo}`);
+    return;
+  }
+  if (importadas.length === 0) {
+    alert('O arquivo não tem nenhuma tarefa.');
+    return;
+  }
+  if (!confirm(`Importar ${importadas.length} tarefa(s)? Isso substitui todas as tarefas deste aparelho.`)) return;
+
+  tarefas = importadas;
   atualizar();
 });
 

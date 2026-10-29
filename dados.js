@@ -66,3 +66,65 @@ export function carregar() {
 export function salvar(tarefas) {
   localStorage.setItem(CHAVE, JSON.stringify(tarefas));
 }
+
+// ---------- Exportação e importação ----------
+
+// Campos do formato de troca, na ordem em que aparecem no JSON.
+export const CAMPOS = ['aba', 'grupo', 'titulo', 'desc', 'tag', 'tagTexto', 'status', 'ordem'];
+
+// Lista pronta para exportar: só os campos do formato, sem o id interno.
+export function paraExportar(tarefas) {
+  return tarefas.map((t) => Object.fromEntries(CAMPOS.map((campo) => [campo, t[campo]])));
+}
+
+const comoTexto = (valor) => (valor === undefined || valor === null ? '' : String(valor).trim());
+
+// Confere um item vindo de um arquivo. Devolve { tarefa } ou { erro }.
+function validarTarefa(item, numero) {
+  if (typeof item !== 'object' || item === null || Array.isArray(item)) {
+    return { erro: `Item ${numero}: não é uma tarefa (esperava um objeto { ... }).` };
+  }
+
+  const tarefa = {
+    aba: comoTexto(item.aba).toLowerCase(),
+    grupo: comoTexto(item.grupo) || 'Geral',
+    titulo: comoTexto(item.titulo),
+    desc: comoTexto(item.desc),
+    tag: comoTexto(item.tag).toLowerCase() || 'next',
+    tagTexto: comoTexto(item.tagTexto),
+    status: comoTexto(item.status).toLowerCase() || 'aberto',
+    ordem: comoTexto(item.ordem) === '' ? numero : Number(item.ordem),
+  };
+
+  if (!ABAS.includes(tarefa.aba)) {
+    return { erro: `Item ${numero}: aba "${comoTexto(item.aba)}" inválida (use projetos ou pessoal).` };
+  }
+  if (!tarefa.titulo) {
+    return { erro: `Item ${numero}: falta o título.` };
+  }
+  if (!Object.hasOwn(TAGS, tarefa.tag)) {
+    return { erro: `Item ${numero}: tag "${tarefa.tag}" inválida (use next, wait, decide ou someday).` };
+  }
+  if (!STATUS.includes(tarefa.status)) {
+    return { erro: `Item ${numero}: status "${tarefa.status}" inválido (use aberto, feito ou encerrado).` };
+  }
+  if (!Number.isFinite(tarefa.ordem)) {
+    return { erro: `Item ${numero}: ordem "${comoTexto(item.ordem)}" não é um número.` };
+  }
+  return { tarefa: novaTarefa(tarefa) };
+}
+
+// Confere a lista inteira. Devolve as tarefas válidas e a lista de erros.
+export function validarLista(dados) {
+  if (!Array.isArray(dados)) {
+    return { tarefas: [], erros: ['O arquivo precisa conter uma lista de tarefas: [ { ... }, { ... } ].'] };
+  }
+  const tarefas = [];
+  const erros = [];
+  dados.forEach((item, indice) => {
+    const resultado = validarTarefa(item, indice + 1);
+    if (resultado.erro) erros.push(resultado.erro);
+    else tarefas.push(resultado.tarefa);
+  });
+  return { tarefas, erros };
+}

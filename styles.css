@@ -288,3 +288,25 @@ button, input { font: inherit; color: inherit; }
   color: var(--destaque-texto);
   font-weight: 600;
 }
+
+/* ---------- Backup ---------- */
+.backup {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
+}
+
+.backup h2 { margin: 0 0 4px; font-size: 1rem; }
+
+.backup p { margin: 0 0 12px; color: var(--texto-suave); font-size: 0.9rem; }
+
+.backup-acoes { display: flex; gap: 8px; }
+
+.backup-acoes button {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  cursor: pointer;
+}

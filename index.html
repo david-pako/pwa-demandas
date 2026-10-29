@@ -45,6 +45,16 @@
     </form>
 
     <section id="lista" class="lista"></section>
+
+    <footer class="backup">
+      <h2>Backup</h2>
+      <p>Suas tarefas ficam só neste aparelho. Exporte de vez em quando para não perder nada.</p>
+      <div class="backup-acoes">
+        <button type="button" id="botao-exportar">Exportar JSON</button>
+        <button type="button" id="botao-importar">Importar JSON</button>
+      </div>
+      <input type="file" id="arquivo-importar" accept="application/json,.json" hidden>
+    </footer>
   </main>
 
   <dialog id="dialogo" class="dialogo" aria-labelledby="dialogo-titulo">

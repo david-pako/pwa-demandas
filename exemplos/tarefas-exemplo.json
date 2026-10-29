@@ -1,0 +1,72 @@
+[
+  {
+    "aba": "projetos",
+    "grupo": "Site novo",
+    "titulo": "Revisar textos da página inicial",
+    "desc": "",
+    "tag": "next",
+    "tagTexto": "Próximo",
+    "status": "aberto",
+    "ordem": 1
+  },
+  {
+    "aba": "projetos",
+    "grupo": "Site novo",
+    "titulo": "Receber fotos do fotógrafo",
+    "desc": "Combinado para o fim do mês.",
+    "tag": "wait",
+    "tagTexto": "Fotógrafo",
+    "status": "aberto",
+    "ordem": 2
+  },
+  {
+    "aba": "projetos",
+    "grupo": "Evento de lançamento",
+    "titulo": "Definir data do evento",
+    "desc": "",
+    "tag": "decide",
+    "tagTexto": "",
+    "status": "aberto",
+    "ordem": 1
+  },
+  {
+    "aba": "projetos",
+    "grupo": "Evento de lançamento",
+    "titulo": "Reservar o espaço",
+    "desc": "",
+    "tag": "next",
+    "tagTexto": "",
+    "status": "feito",
+    "ordem": 2
+  },
+  {
+    "aba": "pessoal",
+    "grupo": "Casa",
+    "titulo": "Consertar a torneira",
+    "desc": "",
+    "tag": "next",
+    "tagTexto": "",
+    "status": "aberto",
+    "ordem": 1
+  },
+  {
+    "aba": "pessoal",
+    "grupo": "Leitura",
+    "titulo": "Ler um livro de ficção científica",
+    "desc": "",
+    "tag": "someday",
+    "tagTexto": "",
+    "status": "aberto",
+    "ordem": 1
+  },
+  {
+    "aba": "pessoal",
+    "grupo": "Leitura",
+    "titulo": "Assinar revista de culinária",
+    "desc": "",
+    "tag": "someday",
+    "tagTexto": "",
+    "status": "encerrado",
+    "ordem": 2
+  }
+]
