@@ -46,5 +46,52 @@
 
     <section id="lista" class="lista"></section>
   </main>
+
+  <dialog id="dialogo" class="dialogo" aria-labelledby="dialogo-titulo">
+    <form id="form-editar" class="form-editar">
+      <h2 id="dialogo-titulo">Editar tarefa</h2>
+
+      <label>Título
+        <input name="titulo" required>
+      </label>
+
+      <label>Descrição
+        <textarea name="desc" rows="3"></textarea>
+      </label>
+
+      <div class="linha">
+        <label>Aba
+          <select name="aba">
+            <option value="projetos">Projetos</option>
+            <option value="pessoal">Pessoal</option>
+          </select>
+        </label>
+        <label>Grupo
+          <input name="grupo" list="lista-grupos" required>
+        </label>
+      </div>
+      <datalist id="lista-grupos"></datalist>
+
+      <div class="linha">
+        <label>Tag
+          <select name="tag">
+            <option value="next">Próximo</option>
+            <option value="wait">Aguardando</option>
+            <option value="decide">Decidir</option>
+            <option value="someday">Algum dia</option>
+          </select>
+        </label>
+        <label>Texto da tag
+          <input name="tagTexto" placeholder="Opcional">
+        </label>
+      </div>
+
+      <div class="dialogo-acoes">
+        <button type="button" id="botao-excluir" class="perigo">Excluir</button>
+        <button type="button" id="botao-cancelar">Cancelar</button>
+        <button type="submit" class="principal">Salvar</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>

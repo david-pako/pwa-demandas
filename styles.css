@@ -229,3 +229,62 @@ button, input { font: inherit; color: inherit; }
   color: var(--destaque-texto);
   font-weight: 600;
 }
+
+/* ---------- Diálogo de edição ---------- */
+.dialogo {
+  width: min(100% - 32px, 480px);
+  padding: 0;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.dialogo::backdrop { background: rgb(0 0 0 / 0.5); }
+
+.form-editar { display: grid; gap: 12px; padding: 16px; }
+
+.form-editar h2 { margin: 0; font-size: 1.1rem; }
+
+.form-editar label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.form-editar input,
+.form-editar select,
+.form-editar textarea {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--fundo);
+  color: var(--texto);
+  font-size: 1rem; /* 16px evita o zoom automático do celular ao focar */
+}
+
+.form-editar textarea { resize: vertical; }
+
+.linha { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.dialogo-acoes { display: flex; gap: 8px; margin-top: 4px; }
+
+.dialogo-acoes button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: transparent;
+  cursor: pointer;
+}
+
+.dialogo-acoes .perigo { margin-right: auto; color: #dc2626; border-color: currentColor; }
+
+.dialogo-acoes .principal {
+  background: var(--destaque);
+  border-color: var(--destaque);
+  color: var(--destaque-texto);
+  font-weight: 600;
+}

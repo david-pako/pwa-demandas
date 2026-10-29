@@ -115,9 +115,31 @@ function criarBotao(acao, texto) {
 
 function botoesDa(t) {
   if (t.status === 'aberto') {
-    return [criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar')];
+    return [criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar'), criarBotao('editar', 'Editar')];
   }
-  return [criarBotao('reabrir', 'Reabrir')];
+  return [criarBotao('reabrir', 'Reabrir'), criarBotao('editar', 'Editar')];
+}
+
+// ---------- Edição ----------
+const dialogo = document.getElementById('dialogo');
+const formEditar = document.getElementById('form-editar');
+const CAMPOS_EDITAVEIS = ['titulo', 'desc', 'aba', 'grupo', 'tag', 'tagTexto'];
+let emEdicao = null; // a tarefa aberta no diálogo
+
+// Sugestões do campo Grupo: os grupos que já existem na aba escolhida.
+function preencherGrupos(aba) {
+  document.getElementById('lista-grupos').replaceChildren(
+    ...gruposDaAba(aba).map((grupo) => el('option', { value: grupo })),
+  );
+}
+
+function abrirEdicao(tarefa) {
+  emEdicao = tarefa;
+  for (const campo of CAMPOS_EDITAVEIS) {
+    formEditar.elements[campo].value = tarefa[campo];
+  }
+  preencherGrupos(tarefa.aba);
+  dialogo.showModal();
 }
 
 // ---------- Eventos ----------
@@ -155,8 +177,37 @@ lista.addEventListener('click', (evento) => {
     case 'feito': tarefa.status = 'feito'; break;
     case 'encerrar': tarefa.status = 'encerrado'; break;
     case 'reabrir': tarefa.status = 'aberto'; break;
+    case 'editar': abrirEdicao(tarefa); return;
     default: return;
   }
+  atualizar();
+});
+
+formEditar.elements.aba.addEventListener('change', (evento) => preencherGrupos(evento.target.value));
+
+formEditar.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  const campos = {};
+  for (const campo of CAMPOS_EDITAVEIS) {
+    campos[campo] = formEditar.elements[campo].value.trim();
+  }
+  if (!campos.titulo || !campos.grupo) return;
+
+  // Mudou de aba ou de grupo: vai para o fim do grupo novo.
+  if (campos.aba !== emEdicao.aba || campos.grupo !== emEdicao.grupo) {
+    campos.ordem = proximaOrdem(campos.aba, campos.grupo);
+  }
+  Object.assign(emEdicao, campos);
+  dialogo.close();
+  atualizar();
+});
+
+document.getElementById('botao-cancelar').addEventListener('click', () => dialogo.close());
+
+document.getElementById('botao-excluir').addEventListener('click', () => {
+  if (!confirm(`Excluir "${emEdicao.titulo}"? Não dá para desfazer.`)) return;
+  tarefas = tarefas.filter((t) => t !== emEdicao);
+  dialogo.close();
   atualizar();
 });
 
