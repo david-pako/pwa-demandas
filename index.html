@@ -11,7 +11,7 @@
   <link rel="icon" href="./icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js" defer></script>
+  <script type="module" src="./app.js"></script>
 </head>
 <body>
   <header class="topo">
@@ -44,9 +44,7 @@
       <button type="submit">Adicionar</button>
     </form>
 
-    <section id="lista" class="lista" aria-live="polite">
-      <p class="vazio">Nenhuma tarefa por aqui ainda.</p>
-    </section>
+    <section id="lista" class="lista"></section>
   </main>
 </body>
 </html>

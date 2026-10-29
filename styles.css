@@ -8,6 +8,11 @@
   --destaque: #2563eb;
   --destaque-texto: #ffffff;
   --raio: 12px;
+  /* Tags: fundo e texto */
+  --tag-next: #dbeafe;    --tag-next-texto: #1e40af;
+  --tag-wait: #fef3c7;    --tag-wait-texto: #92400e;
+  --tag-decide: #ede9fe;  --tag-decide-texto: #5b21b6;
+  --tag-someday: #e5e7eb; --tag-someday-texto: #374151;
   color-scheme: light dark;
 }
 
@@ -21,6 +26,10 @@
     --borda: #343842;
     --destaque: #60a5fa;
     --destaque-texto: #0b1220;
+    --tag-next: #1e3a5f;    --tag-next-texto: #bfdbfe;
+    --tag-wait: #4a3410;    --tag-wait-texto: #fde68a;
+    --tag-decide: #3b2a63;  --tag-decide-texto: #ddd6fe;
+    --tag-someday: #2f333b; --tag-someday-texto: #d1d5db;
   }
 }
 
@@ -124,3 +133,79 @@ button, input { font: inherit; color: inherit; }
 }
 
 .vazio { color: var(--texto-suave); text-align: center; margin-top: 32px; }
+
+/* ---------- Grupos e tarefas ---------- */
+.grupo { margin-bottom: 24px; }
+
+.grupo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.contador {
+  min-width: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--borda);
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.tarefas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.tarefa {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 12px;
+}
+
+.tarefa-cabeca { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.tarefa-titulo { margin: 6px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+
+.tarefa-desc {
+  margin: 4px 0 0;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  white-space: pre-line; /* respeita as quebras de linha da descrição */
+  overflow-wrap: anywhere;
+}
+
+.tag, .selo {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.tag-next    { background: var(--tag-next);    color: var(--tag-next-texto); }
+.tag-wait    { background: var(--tag-wait);    color: var(--tag-wait-texto); }
+.tag-decide  { background: var(--tag-decide);  color: var(--tag-decide-texto); }
+.tag-someday { background: var(--tag-someday); color: var(--tag-someday-texto); }
+
+.selo { border: 1px solid var(--borda); color: var(--texto-suave); }
+
+/* Tarefas fechadas: apagadas e riscadas */
+.status-feito, .status-encerrado { opacity: 0.7; }
+.status-feito .tarefa-titulo,
+.status-encerrado .tarefa-titulo { text-decoration: line-through; }
+
+.fechadas { margin-top: 8px; }
+
+.fechadas summary {
+  padding: 8px 0;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
