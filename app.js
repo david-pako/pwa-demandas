@@ -235,7 +235,7 @@ arquivoImportar.addEventListener('change', async () => {
 
   let dados;
   try {
-    dados = JSON.parse(texto.replace(/^﻿/, '')); // ignora o BOM que alguns editores colocam
+    dados = JSON.parse(texto.replace(/^\uFEFF/, '')); // ignora o BOM que alguns editores colocam
   } catch {
     alert('Não consegui ler o arquivo: ele não é um JSON válido.');
     return;
