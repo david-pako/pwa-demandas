@@ -1,4 +1,4 @@
-import { carregar, TAGS } from './dados.js';
+import { carregar, salvar, novaTarefa, TAGS } from './dados.js';
 
 // ---------- Estado ----------
 const CHAVE_ABA = 'demandas.aba';
@@ -25,6 +25,18 @@ const porOrdem = (a, b) => a.ordem - b.ordem;
 function gruposDaAba(aba) {
   const grupos = [...new Set(tarefas.filter((t) => t.aba === aba).map((t) => t.grupo))];
   return grupos.sort((a, b) => (b === GRUPO_RAPIDO) - (a === GRUPO_RAPIDO));
+}
+
+// Próxima posição livre no fim de um grupo.
+function proximaOrdem(aba, grupo) {
+  const ordens = tarefas.filter((t) => t.aba === aba && t.grupo === grupo).map((t) => t.ordem);
+  return ordens.length > 0 ? Math.max(...ordens) + 1 : 1;
+}
+
+// Toda mudança termina aqui: grava no aparelho e redesenha a tela.
+function atualizar() {
+  salvar(tarefas);
+  render();
 }
 
 // ---------- Desenho da tela ----------
@@ -101,6 +113,21 @@ document.querySelector('.abas').addEventListener('click', (evento) => {
   abaAtual = botao.dataset.aba;
   localStorage.setItem(CHAVE_ABA, abaAtual);
   render();
+});
+
+const campoRapido = document.getElementById('campo-rapido');
+document.getElementById('form-rapido').addEventListener('submit', (evento) => {
+  evento.preventDefault(); // impede o recarregamento da página
+  const titulo = campoRapido.value.trim();
+  if (!titulo) return;
+  tarefas.push(novaTarefa({
+    aba: abaAtual,
+    grupo: GRUPO_RAPIDO,
+    titulo,
+    ordem: proximaOrdem(abaAtual, GRUPO_RAPIDO),
+  }));
+  campoRapido.value = '';
+  atualizar();
 });
 
 // ---------- Início ----------
