@@ -310,3 +310,14 @@ button, input { font: inherit; color: inherit; }
   background: var(--superficie);
   cursor: pointer;
 }
+
+.desfazer {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px dashed var(--borda);
+  border-radius: var(--raio);
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: pointer;
+}

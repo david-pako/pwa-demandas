@@ -1,4 +1,7 @@
-import { carregar, salvar, novaTarefa, paraExportar, validarLista, TAGS } from './dados.js';
+import {
+  carregar, salvar, novaTarefa, paraExportar, validarLista, TAGS,
+  guardarCopia, lerCopia, apagarCopia,
+} from './dados.js';
 
 // ---------- Estado ----------
 const CHAVE_ABA = 'demandas.aba';
@@ -44,6 +47,20 @@ function render() {
   renderResumo();
   renderAbas();
   renderLista();
+  renderDesfazer();
+}
+
+// Mostra o botão "Desfazer importação" só quando existe uma cópia guardada.
+function renderDesfazer() {
+  const botao = document.getElementById('botao-desfazer');
+  const copia = lerCopia();
+  botao.hidden = !copia;
+  if (copia) {
+    const quando = new Date(copia.data).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+    });
+    botao.textContent = `Desfazer importação de ${quando}`;
+  }
 }
 
 function renderResumo() {
@@ -251,9 +268,19 @@ arquivoImportar.addEventListener('change', async () => {
     alert('O arquivo não tem nenhuma tarefa.');
     return;
   }
-  if (!confirm(`Importar ${importadas.length} tarefa(s)? Isso substitui todas as tarefas deste aparelho.`)) return;
+  if (!confirm(`Importar ${importadas.length} tarefa(s)? Isso substitui todas as tarefas deste aparelho.\n\nVocê poderá desfazer depois.`)) return;
 
+  guardarCopia(tarefas); // guarda as tarefas atuais antes de substituir
   tarefas = importadas;
+  atualizar();
+});
+
+document.getElementById('botao-desfazer').addEventListener('click', () => {
+  const copia = lerCopia();
+  if (!copia) return;
+  if (!confirm(`Voltar para as ${copia.tarefas.length} tarefa(s) de antes da importação? As tarefas atuais serão substituídas.`)) return;
+  tarefas = copia.tarefas;
+  apagarCopia();
   atualizar();
 });
 

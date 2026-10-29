@@ -86,6 +86,10 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
 - Ao mudar de aba ou de grupo na edição, a tarefa vai para o fim do grupo novo.
 - Importar **substitui** todas as tarefas do aparelho, após confirmação. Se qualquer item for
   inválido, nada é importado e os erros são mostrados. Campos opcionais ausentes recebem padrão.
+- Antes de importar, o app guarda uma cópia das tarefas atuais (chave `demandas.antesDaImportacao`)
+  e mostra o botão **"Desfazer importação"**. Só o estado anterior à última importação é guardado;
+  desfazer restaura a cópia e a apaga.
+- O campo de importação não usa `accept`: no Android ele bloqueia arquivos válidos (ex.: JSON salvo como .txt).
 - Exportar gera `demandas-AAAA-MM-DD.json` sem o `id` interno.
 - Arquivo de exemplo para testar importação: `exemplos/tarefas-exemplo.json` (dados fictícios).
 

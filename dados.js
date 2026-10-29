@@ -67,6 +67,27 @@ export function salvar(tarefas) {
   localStorage.setItem(CHAVE, JSON.stringify(tarefas));
 }
 
+// ---------- Cópia de segurança antes de importar ----------
+// Guarda só o estado de antes da última importação, para o "Desfazer importação".
+const CHAVE_COPIA = 'demandas.antesDaImportacao';
+
+export function guardarCopia(tarefas) {
+  localStorage.setItem(CHAVE_COPIA, JSON.stringify({ data: new Date().toISOString(), tarefas }));
+}
+
+// Devolve { data, tarefas } ou null se não houver cópia.
+export function lerCopia() {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_COPIA));
+  } catch {
+    return null;
+  }
+}
+
+export function apagarCopia() {
+  localStorage.removeItem(CHAVE_COPIA);
+}
+
 // ---------- Exportação e importação ----------
 
 // Campos do formato de troca, na ordem em que aparecem no JSON.
