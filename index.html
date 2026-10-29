@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Acompanhe suas demandas pelo celular, mesmo offline.">
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181d" media="(prefers-color-scheme: dark)">
+  <title>Demandas</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topo">
+    <h1>Demandas</h1>
+    <dl class="resumo">
+      <div class="resumo-item">
+        <dt>Para fazer</dt>
+        <dd id="total-fazer">0</dd>
+      </div>
+      <div class="resumo-item">
+        <dt>Aguardando</dt>
+        <dd id="total-aguardando">0</dd>
+      </div>
+      <div class="resumo-item">
+        <dt>Concluídas</dt>
+        <dd id="total-concluidas">0</dd>
+      </div>
+    </dl>
+  </header>
+
+  <nav class="abas" role="tablist" aria-label="Abas">
+    <button class="aba" role="tab" id="aba-projetos" aria-selected="true" data-aba="projetos">Projetos</button>
+    <button class="aba" role="tab" id="aba-pessoal" aria-selected="false" data-aba="pessoal">Pessoal</button>
+  </nav>
+
+  <main class="conteudo">
+    <form class="rapido" id="form-rapido" autocomplete="off">
+      <label class="oculto" for="campo-rapido">Nova tarefa</label>
+      <input id="campo-rapido" type="text" placeholder="Anotar tarefa nova…" enterkeyhint="done">
+      <button type="submit">Adicionar</button>
+    </form>
+
+    <section id="lista" class="lista" aria-live="polite">
+      <p class="vazio">Nenhuma tarefa por aqui ainda.</p>
+    </section>
+  </main>
+</body>
+</html>

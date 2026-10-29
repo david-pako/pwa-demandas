@@ -1,0 +1,126 @@
+/* ---------- Cores (tema claro) ---------- */
+:root {
+  --fundo: #f6f7f9;
+  --superficie: #ffffff;
+  --texto: #1c1f24;
+  --texto-suave: #5f6670;
+  --borda: #dde1e6;
+  --destaque: #2563eb;
+  --destaque-texto: #ffffff;
+  --raio: 12px;
+  color-scheme: light dark;
+}
+
+/* ---------- Tema escuro: só troca as variáveis ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #16181d;
+    --superficie: #20232a;
+    --texto: #e8eaed;
+    --texto-suave: #9aa1ab;
+    --borda: #343842;
+    --destaque: #60a5fa;
+    --destaque-texto: #0b1220;
+  }
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  /* Respeita o entalhe e a barra de gestos do celular */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+button, input { font: inherit; color: inherit; }
+
+.oculto {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* ---------- Topo e resumo ---------- */
+.topo { padding: 16px 16px 8px; }
+
+.topo h1 { margin: 0 0 12px; font-size: 1.5rem; }
+
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.resumo-item {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 10px;
+  text-align: center;
+}
+
+.resumo-item dt { font-size: 0.8rem; color: var(--texto-suave); }
+.resumo-item dd { margin: 0; font-size: 1.5rem; font-weight: 700; }
+
+/* ---------- Abas ---------- */
+.abas {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  position: sticky;
+  top: 0;
+  background: var(--fundo);
+  z-index: 1;
+}
+
+.aba {
+  flex: 1;
+  min-height: 44px; /* área de toque confortável */
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: var(--superficie);
+  cursor: pointer;
+}
+
+.aba[aria-selected="true"] {
+  background: var(--destaque);
+  border-color: var(--destaque);
+  color: var(--destaque-texto);
+  font-weight: 600;
+}
+
+/* ---------- Conteúdo ---------- */
+.conteudo { padding: 8px 16px 32px; }
+
+.rapido { display: flex; gap: 8px; margin-bottom: 16px; }
+
+.rapido input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+}
+
+.rapido button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--raio);
+  background: var(--destaque);
+  color: var(--destaque-texto);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vazio { color: var(--texto-suave); text-align: center; margin-top: 32px; }
