@@ -101,9 +101,23 @@ function renderTarefa(t) {
     ),
     el('p', { className: 'tarefa-titulo', textContent: t.titulo }),
     t.desc ? el('p', { className: 'tarefa-desc', textContent: t.desc }) : null,
+    el('div', { className: 'tarefa-acoes' }, ...botoesDa(t)),
   );
   item.dataset.id = t.id;
   return item;
+}
+
+function criarBotao(acao, texto) {
+  const botao = el('button', { type: 'button', className: `acao acao-${acao}`, textContent: texto });
+  botao.dataset.acao = acao;
+  return botao;
+}
+
+function botoesDa(t) {
+  if (t.status === 'aberto') {
+    return [criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar')];
+  }
+  return [criarBotao('reabrir', 'Reabrir')];
 }
 
 // ---------- Eventos ----------
@@ -127,6 +141,22 @@ document.getElementById('form-rapido').addEventListener('submit', (evento) => {
     ordem: proximaOrdem(abaAtual, GRUPO_RAPIDO),
   }));
   campoRapido.value = '';
+  atualizar();
+});
+
+// Delegação de eventos: um só ouvinte na lista atende os botões de todas as tarefas.
+lista.addEventListener('click', (evento) => {
+  const botao = evento.target.closest('button[data-acao]');
+  if (!botao) return;
+  const tarefa = tarefas.find((t) => t.id === botao.closest('.tarefa').dataset.id);
+  if (!tarefa) return;
+
+  switch (botao.dataset.acao) {
+    case 'feito': tarefa.status = 'feito'; break;
+    case 'encerrar': tarefa.status = 'encerrado'; break;
+    case 'reabrir': tarefa.status = 'aberto'; break;
+    default: return;
+  }
   atualizar();
 });
 
