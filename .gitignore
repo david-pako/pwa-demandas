@@ -1,0 +1,16 @@
+# Arquivos do sistema operacional
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+
+# Configurações locais do Claude Code
+.claude/settings.local.json
+
+# Backups com tarefas reais: nunca enviar ao repositório público
+backup*.json
+demandas-*.json
+*.backup.json
