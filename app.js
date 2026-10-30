@@ -481,11 +481,52 @@ if (localStorage.getItem(CHAVE_NUVEM)) {
 }
 iniciarNuvem();
 
+// ---------- Service worker e atualizações ----------
 // Registra o service worker, que permite instalar o app e usá-lo offline.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((erro) => {
+  window.addEventListener('load', async () => {
+    try {
+      acompanharAtualizacoes(await navigator.serviceWorker.register('./sw.js'));
+    } catch (erro) {
       console.error('Falha ao registrar o service worker:', erro);
+    }
+  });
+}
+
+let atualizacaoPedida = false;
+
+function acompanharAtualizacoes(registro) {
+  // Há versão nova esperando? (controller existe = não é a primeira instalação)
+  const avisarSeHouver = () => {
+    if (registro.waiting && navigator.serviceWorker.controller) mostrarAvisoAtualizacao(registro.waiting);
+  };
+  avisarSeHouver();
+
+  // Uma versão nova começou a ser baixada: avisa quando terminar.
+  registro.addEventListener('updatefound', () => {
+    const novo = registro.installing;
+    novo?.addEventListener('statechange', () => {
+      if (novo.state === 'installed') avisarSeHouver();
     });
   });
+
+  // Ao voltar para o app, pergunta ao servidor se há versão nova.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') registro.update().catch(() => {});
+  });
+
+  // A versão nova assumiu: recarrega para usar o código novo
+  // (só se a pessoa pediu; na primeira instalação não recarrega).
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (atualizacaoPedida) window.location.reload();
+  });
+}
+
+function mostrarAvisoAtualizacao(novoServiceWorker) {
+  const aviso = document.getElementById('aviso-atualizacao');
+  aviso.hidden = false;
+  document.getElementById('botao-atualizar').onclick = () => {
+    atualizacaoPedida = true;
+    novoServiceWorker.postMessage({ tipo: 'atualizar' });
+  };
 }

@@ -373,3 +373,34 @@ button, input { font: inherit; color: inherit; }
 .acao-subir { margin-left: auto; } /* empurra as setas para a direita */
 .acao-subir, .acao-descer { min-width: 36px; padding: 0; }
 .acao:disabled { opacity: 0.35; cursor: default; }
+
+/* ---------- Aviso de nova versão ---------- */
+.aviso-atualizacao {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--raio);
+  background: var(--texto);
+  color: var(--fundo);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.25);
+  z-index: 10;
+}
+
+.aviso-atualizacao[hidden] { display: none; } /* o display: flex acima anularia o hidden */
+
+.aviso-atualizacao button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--destaque);
+  color: var(--destaque-texto);
+  font-weight: 600;
+  cursor: pointer;
+}

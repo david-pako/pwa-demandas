@@ -1,7 +1,7 @@
 // Service worker: guarda os arquivos do app no aparelho para funcionar offline.
 // IMPORTANTE: ao alterar qualquer arquivo do app, incremente VERSAO
 // para que os aparelhos baixem a versão nova.
-const VERSAO = 'v8';
+const VERSAO = 'v9';
 const CACHE = `demandas-${VERSAO}`;
 
 const ARQUIVOS = [
@@ -25,6 +25,7 @@ const ARQUIVOS_FIREBASE = ['firebase-app.js', 'firebase-auth.js', 'firebase-fire
   .map((nome) => FIREBASE + nome);
 
 // 1. install: baixa todos os arquivos e guarda no cache.
+// A versão nova fica esperando: só assume quando a pessoa toca em "Atualizar" no app.
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
     caches.open(CACHE)
@@ -32,8 +33,12 @@ self.addEventListener('install', (evento) => {
         // Se o Firebase falhar aqui, não impede a instalação: ele é guardado no primeiro uso.
         cache.addAll(ARQUIVOS_FIREBASE).catch(() => {})
       ))
-      .then(() => self.skipWaiting())
   );
+});
+
+// O app pede para a versão nova assumir (botão "Atualizar").
+self.addEventListener('message', (evento) => {
+  if (evento.data?.tipo === 'atualizar') self.skipWaiting();
 });
 
 // 2. activate: apaga caches de versões antigas.
