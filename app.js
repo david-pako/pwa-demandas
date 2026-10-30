@@ -313,7 +313,7 @@ document.getElementById('botao-desfazer').addEventListener('click', () => {
 const CHAVE_TEMA = 'demandas.tema';
 const TEMAS = ['auto', 'claro', 'escuro'];
 const ROTULOS_TEMA = { auto: '◐ Automático', claro: '☀ Claro', escuro: '☾ Escuro' };
-const CORES_BARRA = { claro: '#f6f7f9', escuro: '#16181d' };
+const CORES_BARRA = { claro: '#f5f7f5', escuro: '#121814' }; // iguais ao --fundo do styles.css
 const botaoTema = document.getElementById('botao-tema');
 
 function aplicarTema(tema) {
