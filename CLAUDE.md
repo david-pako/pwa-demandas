@@ -10,7 +10,7 @@ App para acompanhar demandas pessoais pelo celular. O dono do projeto quer **apr
 - Autor dos commits: `david-pako` com e-mail noreply do GitHub (já configurado no repositório local).
   Nunca usar o e-mail pessoal.
 - Fim de linha LF (garantido pelo `.gitattributes`).
-- A v1 está concluída. A v2 (sincronização) foi pedida em 30/10/2026 e está em andamento.
+- v1 e v2 concluídas e testadas no celular e no computador (v2 em 30/10/2026).
 
 ## Privacidade (repositório público)
 
@@ -103,7 +103,7 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
 - Abre no celular, oferece a opção de instalar e funciona em modo avião.
 - Importa um JSON no formato acima sem erro.
 
-## v2: sincronização entre aparelhos (em andamento)
+## v2: sincronização entre aparelhos (concluída)
 
 Decisões do dono do projeto:
 
