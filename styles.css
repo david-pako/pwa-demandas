@@ -199,7 +199,7 @@ button, input { font: inherit; color: inherit; }
 }
 
 /* ---------- Botões de ação das tarefas ---------- */
-.tarefa-acoes { display: flex; gap: 8px; margin-top: 10px; }
+.tarefa-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
 .acao {
   min-height: 36px;
@@ -368,3 +368,8 @@ button, input { font: inherit; color: inherit; }
   font-size: 0.85rem;
   cursor: pointer;
 }
+
+/* ---------- Mover tarefas (↑ ↓) ---------- */
+.acao-subir { margin-left: auto; } /* empurra as setas para a direita */
+.acao-subir, .acao-descer { min-width: 36px; padding: 0; }
+.acao:disabled { opacity: 0.35; cursor: default; }

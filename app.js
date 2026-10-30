@@ -32,6 +32,22 @@ function gruposDaAba(aba) {
   return grupos.sort((a, b) => (b === GRUPO_RAPIDO) - (a === GRUPO_RAPIDO));
 }
 
+// Troca a tarefa de lugar com a vizinha (direcao -1 sobe, +1 desce) entre as abertas do grupo.
+// Renumera o grupo 1, 2, 3... e grava só as tarefas cuja ordem mudou.
+function mover(tarefa, direcao) {
+  const abertas = tarefas
+    .filter((t) => t.aba === tarefa.aba && t.grupo === tarefa.grupo && t.status === 'aberto')
+    .sort(porOrdem);
+  const de = abertas.findIndex((t) => t.id === tarefa.id);
+  const para = de + direcao;
+  if (de < 0 || para < 0 || para >= abertas.length) return;
+
+  [abertas[de], abertas[para]] = [abertas[para], abertas[de]];
+  abertas.forEach((t, posicao) => {
+    if (t.ordem !== posicao + 1) armazenamento.alterar(t.id, { ordem: posicao + 1 });
+  });
+}
+
 // Próxima posição livre no fim de um grupo.
 function proximaOrdem(aba, grupo) {
   const ordens = tarefas.filter((t) => t.aba === aba && t.grupo === grupo).map((t) => t.ordem);
@@ -92,7 +108,7 @@ function renderGrupo(grupo) {
     const chave = `${abaAtual}|${grupo}`;
     blocoFechadas = el('details', { className: 'fechadas', open: gruposExpandidos.has(chave) },
       el('summary', { textContent: `${fechadas.length} fechada(s)` }),
-      el('ul', { className: 'tarefas' }, ...fechadas.map(renderTarefa)),
+      el('ul', { className: 'tarefas' }, ...fechadas.map((t) => renderTarefa(t))),
     );
     blocoFechadas.addEventListener('toggle', () => {
       if (blocoFechadas.open) gruposExpandidos.add(chave);
@@ -102,12 +118,15 @@ function renderGrupo(grupo) {
 
   return el('section', { className: 'grupo' },
     el('h2', { className: 'grupo-titulo' }, grupo, el('span', { className: 'contador', textContent: abertas.length })),
-    abertas.length > 0 ? el('ul', { className: 'tarefas' }, ...abertas.map(renderTarefa)) : null,
+    abertas.length > 0
+      ? el('ul', { className: 'tarefas' }, ...abertas.map((t, i) => renderTarefa(t, i === 0, i === abertas.length - 1)))
+      : null,
     blocoFechadas,
   );
 }
 
-function renderTarefa(t) {
+// primeira/ultima: posição entre as abertas do grupo, para desativar ↑ e ↓ nas pontas.
+function renderTarefa(t, primeira = false, ultima = false) {
   const item = el('li', { className: `tarefa status-${t.status}` },
     el('div', { className: 'tarefa-cabeca' },
       el('span', { className: `tag tag-${t.tag}`, textContent: t.tagTexto || TAGS[t.tag] }),
@@ -115,21 +134,32 @@ function renderTarefa(t) {
     ),
     el('p', { className: 'tarefa-titulo', textContent: t.titulo }),
     t.desc ? el('p', { className: 'tarefa-desc', textContent: t.desc }) : null,
-    el('div', { className: 'tarefa-acoes' }, ...botoesDa(t)),
+    el('div', { className: 'tarefa-acoes' }, ...botoesDa(t, primeira, ultima)),
   );
   item.dataset.id = t.id;
   return item;
 }
 
-function criarBotao(acao, texto) {
+function criarBotao(acao, texto, rotulo = '') {
   const botao = el('button', { type: 'button', className: `acao acao-${acao}`, textContent: texto });
   botao.dataset.acao = acao;
+  if (rotulo) {
+    botao.setAttribute('aria-label', rotulo); // lido por leitores de tela no lugar da seta
+    botao.title = rotulo;
+  }
   return botao;
 }
 
-function botoesDa(t) {
+function botoesDa(t, primeira, ultima) {
   if (t.status === 'aberto') {
-    return [criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar'), criarBotao('editar', 'Editar')];
+    const subir = criarBotao('subir', '↑', 'Mover para cima');
+    const descer = criarBotao('descer', '↓', 'Mover para baixo');
+    subir.disabled = primeira;
+    descer.disabled = ultima;
+    return [
+      criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar'), criarBotao('editar', 'Editar'),
+      subir, descer,
+    ];
   }
   return [criarBotao('reabrir', 'Reabrir'), criarBotao('editar', 'Editar')];
 }
@@ -191,6 +221,8 @@ lista.addEventListener('click', (evento) => {
     case 'encerrar': armazenamento.alterar(tarefa.id, { status: 'encerrado' }); break;
     case 'reabrir': armazenamento.alterar(tarefa.id, { status: 'aberto' }); break;
     case 'editar': abrirEdicao(tarefa); break;
+    case 'subir': mover(tarefa, -1); break;
+    case 'descer': mover(tarefa, 1); break;
     default: break;
   }
 });
