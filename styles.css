@@ -321,3 +321,41 @@ button, input { font: inherit; color: inherit; }
   color: var(--texto-suave);
   cursor: pointer;
 }
+
+/* ---------- Conta e sincronização ---------- */
+.conta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: -4px 0 12px;
+  font-size: 0.85rem;
+}
+
+.conta:empty { display: none; }
+
+.conta-botao {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: var(--superficie);
+  cursor: pointer;
+}
+
+.conta-email { color: var(--texto-suave); overflow-wrap: anywhere; }
+.conta-info { color: var(--texto-suave); }
+.conta-erro { flex-basis: 100%; color: #dc2626; }
+
+/* Bolinha colorida antes do estado da sincronização */
+.sync::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--texto-suave);
+}
+.sync-sincronizado::before { background: #16a34a; }
+.sync-enviando::before { background: #d97706; }

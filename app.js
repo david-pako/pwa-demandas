@@ -7,8 +7,8 @@ import {
 const CHAVE_ABA = 'demandas.aba';
 const GRUPO_RAPIDO = 'Entrada';
 
-// Onde as tarefas ficam. A tela só usa as operações dele (adicionar, alterar...).
-let armazenamento = criarArmazenamentoLocal();
+// Onde as tarefas ficam (aparelho ou nuvem). A tela só usa as operações dele.
+let armazenamento = null;
 let tarefas = []; // cópia da lista para desenhar; é atualizada pelo aoMudar
 let abaAtual = localStorage.getItem(CHAVE_ABA) === 'pessoal' ? 'pessoal' : 'projetos';
 const gruposExpandidos = new Set(); // grupos com as tarefas fechadas à mostra
@@ -40,6 +40,7 @@ function proximaOrdem(aba, grupo) {
 
 // ---------- Desenho da tela ----------
 function render() {
+  renderConta();
   renderResumo();
   renderAbas();
   renderLista();
@@ -260,7 +261,8 @@ arquivoImportar.addEventListener('change', async () => {
     alert('O arquivo não tem nenhuma tarefa.');
     return;
   }
-  if (!confirm(`Importar ${importadas.length} tarefa(s)? Isso substitui todas as tarefas deste aparelho.\n\nVocê poderá desfazer depois.`)) return;
+  const onde = usuario ? 'da sua conta, em todos os aparelhos' : 'deste aparelho';
+  if (!confirm(`Importar ${importadas.length} tarefa(s)? Isso substitui todas as tarefas ${onde}.\n\nVocê poderá desfazer depois.`)) return;
 
   guardarCopia(tarefas); // guarda as tarefas atuais antes de substituir
   armazenamento.substituirTudo(importadas);
@@ -274,12 +276,122 @@ document.getElementById('botao-desfazer').addEventListener('click', () => {
   armazenamento.substituirTudo(copia.tarefas);
 });
 
-// ---------- Início ----------
-// Sempre que a lista mudar (por esta tela ou, na v2, por outro aparelho), redesenha.
-armazenamento.aoMudar((lista) => {
-  tarefas = lista;
-  render();
+// ---------- Conta e nuvem ----------
+const CHAVE_NUVEM = 'demandas.usaNuvem'; // lembra que este aparelho está logado na nuvem
+const conta = document.getElementById('conta');
+let nuvem = null;            // o módulo nuvem.js, depois de carregado
+let usuario = null;          // quem está logado, ou null
+let estadoSync = '';         // 'sincronizado', 'offline', 'enviando' ou '' (só no aparelho)
+let erroNuvem = '';          // último erro da nuvem, mostrado no topo
+let nuvemIndisponivel = false;
+
+// Troca o armazenamento usado pela tela e passa a ouvir as mudanças dele
+// (feitas por esta tela ou, na nuvem, por outro aparelho).
+function usar(novo) {
+  armazenamento?.parar?.();
+  armazenamento = novo;
+  armazenamento.aoMudar((lista, estado = '') => {
+    tarefas = lista;
+    estadoSync = estado;
+    render();
+  });
+}
+
+const TEXTOS_SYNC = {
+  sincronizado: 'Sincronizado',
+  offline: 'Offline',
+  enviando: 'Enviando mudanças…',
+};
+
+function renderConta() {
+  const itens = [];
+  if (usuario) {
+    itens.push(
+      el('span', { className: `sync sync-${estadoSync || 'offline'}`, textContent: TEXTOS_SYNC[estadoSync] ?? 'Conectando…' }),
+      el('span', { className: 'conta-email', textContent: usuario.email }),
+      criarBotaoConta('sair', 'Sair'),
+    );
+  } else if (nuvem) {
+    itens.push(
+      criarBotaoConta('entrar', 'Entrar com Google'),
+      el('span', { className: 'conta-info', textContent: 'para sincronizar entre aparelhos' }),
+    );
+  } else if (nuvemIndisponivel) {
+    itens.push(el('span', { className: 'conta-info', textContent: 'Sincronização indisponível agora. Mostrando as tarefas deste aparelho.' }));
+  }
+  if (erroNuvem) {
+    itens.push(el('span', { className: 'conta-erro', textContent: `Erro na sincronização: ${erroNuvem}` }));
+  }
+  conta.replaceChildren(...itens);
+}
+
+function criarBotaoConta(acao, texto) {
+  const botao = el('button', { type: 'button', className: 'conta-botao', textContent: texto });
+  botao.dataset.conta = acao;
+  return botao;
+}
+
+function mostrarErroNuvem(erro) {
+  console.error('Erro na nuvem:', erro);
+  erroNuvem = erro.code || erro.message || String(erro);
+  renderConta();
+}
+
+conta.addEventListener('click', async (evento) => {
+  const botao = evento.target.closest('button[data-conta]');
+  if (!botao || !nuvem) return;
+
+  if (botao.dataset.conta === 'entrar') {
+    try {
+      await nuvem.entrar();
+    } catch (erro) {
+      // Fechar a janela do Google não é erro.
+      if (erro.code === 'auth/popup-closed-by-user' || erro.code === 'auth/cancelled-popup-request') return;
+      alert(`Não foi possível entrar: ${erro.code || erro.message}`);
+    }
+  } else if (botao.dataset.conta === 'sair') {
+    if (!confirm('Sair da conta? Suas tarefas continuam salvas na nuvem. Neste aparelho, o app volta a mostrar só as tarefas locais.')) return;
+    await nuvem.sair();
+  }
 });
+
+// Carrega o Firebase sem travar o app: se falhar, tudo continua funcionando no aparelho.
+async function iniciarNuvem() {
+  try {
+    nuvem = await import('./nuvem.js');
+  } catch (erro) {
+    console.error('Firebase indisponível:', erro);
+    nuvemIndisponivel = true;
+    if (!armazenamento) usar(criarArmazenamentoLocal());
+    renderConta();
+    return;
+  }
+
+  // Chamado na abertura (com o login lembrado) e sempre que alguém entra ou sai.
+  nuvem.aoMudarUsuario(async (novoUsuario) => {
+    usuario = novoUsuario;
+    erroNuvem = '';
+    estadoSync = '';
+    if (novoUsuario) {
+      localStorage.setItem(CHAVE_NUVEM, novoUsuario.uid);
+      usar(nuvem.criarArmazenamentoNuvem(novoUsuario.uid, mostrarErroNuvem));
+    } else {
+      localStorage.removeItem(CHAVE_NUVEM);
+      usar(criarArmazenamentoLocal());
+    }
+    renderConta();
+  });
+}
+
+// ---------- Início ----------
+// Logado na nuvem: espera o Firebase (evita piscar as tarefas locais).
+// Sem login: mostra as tarefas do aparelho na hora.
+if (localStorage.getItem(CHAVE_NUVEM)) {
+  lista.replaceChildren(el('p', { className: 'vazio', textContent: 'Carregando…' }));
+} else {
+  usar(criarArmazenamentoLocal());
+}
+iniciarNuvem();
 
 // Registra o service worker, que permite instalar o app e usá-lo offline.
 if ('serviceWorker' in navigator) {
