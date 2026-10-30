@@ -169,7 +169,7 @@ const campoRapido = document.getElementById('campo-rapido');
 document.getElementById('form-rapido').addEventListener('submit', (evento) => {
   evento.preventDefault(); // impede o recarregamento da página
   const titulo = campoRapido.value.trim();
-  if (!titulo) return;
+  if (!titulo || !armazenamento) return; // sem armazenamento: ainda carregando a nuvem
   armazenamento.adicionar(novaTarefa({
     aba: abaAtual,
     grupo: GRUPO_RAPIDO,
@@ -235,7 +235,7 @@ document.getElementById('botao-importar').addEventListener('click', () => arquiv
 
 arquivoImportar.addEventListener('change', async () => {
   const arquivo = arquivoImportar.files[0];
-  if (!arquivo) return;
+  if (!arquivo || !armazenamento) return;
   let texto;
   try {
     texto = await arquivo.text();
