@@ -32,10 +32,19 @@ function novoId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+// Marca de tempo sempre crescente, mesmo para tarefas criadas no mesmo milissegundo
+// (ex.: importação). Guarda a ordem de criação, que a nuvem não preserva sozinha.
+let ultimaMarca = 0;
+export function marcaDeTempo() {
+  ultimaMarca = Math.max(Date.now(), ultimaMarca + 1);
+  return ultimaMarca;
+}
+
 // Cria uma tarefa completa: os campos informados substituem os valores padrão.
 export function novaTarefa(campos) {
   return {
     id: novoId(),
+    criadoEm: marcaDeTempo(),
     aba: 'projetos',
     grupo: 'Geral',
     titulo: '',
