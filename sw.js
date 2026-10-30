@@ -1,7 +1,7 @@
 // Service worker: guarda os arquivos do app no aparelho para funcionar offline.
 // IMPORTANTE: ao alterar qualquer arquivo do app, incremente VERSAO
 // para que os aparelhos baixem a versão nova.
-const VERSAO = 'v4';
+const VERSAO = 'v5';
 const CACHE = `demandas-${VERSAO}`;
 
 const ARQUIVOS = [
@@ -13,6 +13,9 @@ const ARQUIVOS = [
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png',
+  './icons/icon.svg',
 ];
 
 // 1. install: baixa todos os arquivos e guarda no cache.

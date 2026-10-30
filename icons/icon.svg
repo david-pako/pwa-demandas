@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="#0f1419"/>
+  <g transform="translate(256 256) scale(1.45) translate(-243 -255)">
+  <!-- linha 1: feito -->
+  <circle cx="156" cy="176" r="30" fill="#3ecf8e"/>
+  <path d="M141 176 l11 11 l20 -22" fill="none" stroke="#0f1419" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="210" y="163" width="150" height="26" rx="13" fill="#e8edf2" opacity="0.45"/>
+  <!-- linha 2: aguardando -->
+  <circle cx="156" cy="256" r="30" fill="#e8a53d"/>
+  <path d="M156 241 v16 l10 7" fill="none" stroke="#0f1419" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="210" y="243" width="122" height="26" rx="13" fill="#e8edf2" opacity="0.85"/>
+  <!-- linha 3: aberto -->
+  <circle cx="156" cy="336" r="26" fill="none" stroke="#e8edf2" stroke-width="8"/>
+  <rect x="210" y="323" width="150" height="26" rx="13" fill="#e8edf2"/>
+  </g>
+</svg>
