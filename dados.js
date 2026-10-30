@@ -67,6 +67,40 @@ export function salvar(tarefas) {
   localStorage.setItem(CHAVE, JSON.stringify(tarefas));
 }
 
+// ---------- Armazenamento local ----------
+// A tela fala só com estas operações. A versão na nuvem (v2) terá as mesmas,
+// então trocar uma pela outra não muda nada no app.js.
+// A lista entregue em aoMudar não deve ser alterada diretamente: use as operações.
+export function criarArmazenamentoLocal() {
+  let tarefas = carregar();
+  let avisar = () => {};
+
+  function gravar(novaLista) {
+    tarefas = novaLista;
+    salvar(tarefas);
+    avisar(tarefas);
+  }
+
+  return {
+    aoMudar(funcao) {
+      avisar = funcao;
+      funcao(tarefas);
+    },
+    adicionar(tarefa) {
+      gravar([...tarefas, tarefa]);
+    },
+    alterar(id, campos) {
+      gravar(tarefas.map((t) => (t.id === id ? { ...t, ...campos } : t)));
+    },
+    remover(id) {
+      gravar(tarefas.filter((t) => t.id !== id));
+    },
+    substituirTudo(lista) {
+      gravar(lista);
+    },
+  };
+}
+
 // ---------- Cópia de segurança antes de importar ----------
 // Guarda só o estado de antes da última importação, para o "Desfazer importação".
 const CHAVE_COPIA = 'demandas.antesDaImportacao';

@@ -1,5 +1,5 @@
 import {
-  carregar, salvar, novaTarefa, paraExportar, validarLista, TAGS,
+  criarArmazenamentoLocal, novaTarefa, paraExportar, validarLista, TAGS,
   guardarCopia, lerCopia, apagarCopia,
 } from './dados.js';
 
@@ -7,7 +7,9 @@ import {
 const CHAVE_ABA = 'demandas.aba';
 const GRUPO_RAPIDO = 'Entrada';
 
-let tarefas = carregar();
+// Onde as tarefas ficam. A tela só usa as operações dele (adicionar, alterar...).
+let armazenamento = criarArmazenamentoLocal();
+let tarefas = []; // cópia da lista para desenhar; é atualizada pelo aoMudar
 let abaAtual = localStorage.getItem(CHAVE_ABA) === 'pessoal' ? 'pessoal' : 'projetos';
 const gruposExpandidos = new Set(); // grupos com as tarefas fechadas à mostra
 
@@ -34,12 +36,6 @@ function gruposDaAba(aba) {
 function proximaOrdem(aba, grupo) {
   const ordens = tarefas.filter((t) => t.aba === aba && t.grupo === grupo).map((t) => t.ordem);
   return ordens.length > 0 ? Math.max(...ordens) + 1 : 1;
-}
-
-// Toda mudança termina aqui: grava no aparelho e redesenha a tela.
-function atualizar() {
-  salvar(tarefas);
-  render();
 }
 
 // ---------- Desenho da tela ----------
@@ -173,14 +169,13 @@ document.getElementById('form-rapido').addEventListener('submit', (evento) => {
   evento.preventDefault(); // impede o recarregamento da página
   const titulo = campoRapido.value.trim();
   if (!titulo) return;
-  tarefas.push(novaTarefa({
+  armazenamento.adicionar(novaTarefa({
     aba: abaAtual,
     grupo: GRUPO_RAPIDO,
     titulo,
     ordem: proximaOrdem(abaAtual, GRUPO_RAPIDO),
   }));
   campoRapido.value = '';
-  atualizar();
 });
 
 // Delegação de eventos: um só ouvinte na lista atende os botões de todas as tarefas.
@@ -191,13 +186,12 @@ lista.addEventListener('click', (evento) => {
   if (!tarefa) return;
 
   switch (botao.dataset.acao) {
-    case 'feito': tarefa.status = 'feito'; break;
-    case 'encerrar': tarefa.status = 'encerrado'; break;
-    case 'reabrir': tarefa.status = 'aberto'; break;
-    case 'editar': abrirEdicao(tarefa); return;
-    default: return;
+    case 'feito': armazenamento.alterar(tarefa.id, { status: 'feito' }); break;
+    case 'encerrar': armazenamento.alterar(tarefa.id, { status: 'encerrado' }); break;
+    case 'reabrir': armazenamento.alterar(tarefa.id, { status: 'aberto' }); break;
+    case 'editar': abrirEdicao(tarefa); break;
+    default: break;
   }
-  atualizar();
 });
 
 formEditar.elements.aba.addEventListener('change', (evento) => preencherGrupos(evento.target.value));
@@ -214,18 +208,16 @@ formEditar.addEventListener('submit', (evento) => {
   if (campos.aba !== emEdicao.aba || campos.grupo !== emEdicao.grupo) {
     campos.ordem = proximaOrdem(campos.aba, campos.grupo);
   }
-  Object.assign(emEdicao, campos);
   dialogo.close();
-  atualizar();
+  armazenamento.alterar(emEdicao.id, campos);
 });
 
 document.getElementById('botao-cancelar').addEventListener('click', () => dialogo.close());
 
 document.getElementById('botao-excluir').addEventListener('click', () => {
   if (!confirm(`Excluir "${emEdicao.titulo}"? Não dá para desfazer.`)) return;
-  tarefas = tarefas.filter((t) => t !== emEdicao);
   dialogo.close();
-  atualizar();
+  armazenamento.remover(emEdicao.id);
 });
 
 // ---------- Exportar e importar ----------
@@ -271,21 +263,23 @@ arquivoImportar.addEventListener('change', async () => {
   if (!confirm(`Importar ${importadas.length} tarefa(s)? Isso substitui todas as tarefas deste aparelho.\n\nVocê poderá desfazer depois.`)) return;
 
   guardarCopia(tarefas); // guarda as tarefas atuais antes de substituir
-  tarefas = importadas;
-  atualizar();
+  armazenamento.substituirTudo(importadas);
 });
 
 document.getElementById('botao-desfazer').addEventListener('click', () => {
   const copia = lerCopia();
   if (!copia) return;
   if (!confirm(`Voltar para as ${copia.tarefas.length} tarefa(s) de antes da importação? As tarefas atuais serão substituídas.`)) return;
-  tarefas = copia.tarefas;
-  apagarCopia();
-  atualizar();
+  apagarCopia(); // antes de substituir, para o botão sumir no redesenho
+  armazenamento.substituirTudo(copia.tarefas);
 });
 
 // ---------- Início ----------
-render();
+// Sempre que a lista mudar (por esta tela ou, na v2, por outro aparelho), redesenha.
+armazenamento.aoMudar((lista) => {
+  tarefas = lista;
+  render();
+});
 
 // Registra o service worker, que permite instalar o app e usá-lo offline.
 if ('serviceWorker' in navigator) {
