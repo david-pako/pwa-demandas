@@ -10,7 +10,7 @@ App para acompanhar demandas pessoais pelo celular. O dono do projeto quer **apr
 - Autor dos commits: `david-pako` com e-mail noreply do GitHub (já configurado no repositório local).
   Nunca usar o e-mail pessoal.
 - Fim de linha LF (garantido pelo `.gitattributes`).
-- Não implementar nada da v2 sem pedido explícito.
+- A v1 está concluída. A v2 (sincronização) foi pedida em 30/10/2026 e está em andamento.
 
 ## Privacidade (repositório público)
 
@@ -103,6 +103,26 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
 - Abre no celular, oferece a opção de instalar e funciona em modo avião.
 - Importa um JSON no formato acima sem erro.
 
-## Fora do escopo (v2, não fazer agora)
+## v2: sincronização entre aparelhos (em andamento)
 
-- Sincronizar entre aparelhos com servidor e login.
+Decisões do dono do projeto:
+
+- **Servidor: Firebase** (Firestore + Authentication). Escolhido porque o Firestore já sincroniza
+  e funciona offline sozinho; a alternativa considerada foi o Supabase.
+- **Login: conta Google.**
+- **Login opcional:** sem login, o app continua funcionando só no aparelho (localStorage), como na v1.
+  Com login, as tarefas ficam na nuvem e sincronizam entre aparelhos.
+
+Regras técnicas da v2:
+
+- Continua **sem build**: o SDK do Firebase é carregado como módulo ES direto do CDN (gstatic).
+- O SDK do Firebase é carregado com `import()` dinâmico, para o app local continuar funcionando
+  se ele falhar (ex.: offline na primeira abertura).
+- A tela (`app.js`) não sabe onde os dados ficam: fala com um "armazenamento" que tem as mesmas
+  operações no modo local e na nuvem (`aoMudar`, `adicionar`, `alterar`, `remover`, `substituirTudo`).
+- Na nuvem, cada usuário só lê e escreve em `usuarios/{uid}/tarefas`, garantido pelas regras de
+  segurança do Firestore (arquivo `firestore.rules`).
+- A configuração do Firebase (apiKey etc.) pode ficar no código público: ela só identifica o projeto.
+  Quem protege os dados são as regras de segurança.
+- **Privacidade:** com login, as tarefas reais ficam no Firebase (Google), não no repositório.
+  A regra de nunca colocar tarefas reais no código continua valendo.
