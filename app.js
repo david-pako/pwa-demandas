@@ -276,6 +276,37 @@ document.getElementById('botao-desfazer').addEventListener('click', () => {
   armazenamento.substituirTudo(copia.tarefas);
 });
 
+// ---------- Tema ----------
+// O <head> já aplicou o tema salvo; aqui ficam o botão e a cor da barra do celular.
+const CHAVE_TEMA = 'demandas.tema';
+const TEMAS = ['auto', 'claro', 'escuro'];
+const ROTULOS_TEMA = { auto: '◐ Automático', claro: '☀ Claro', escuro: '☾ Escuro' };
+const CORES_BARRA = { claro: '#f6f7f9', escuro: '#16181d' };
+const botaoTema = document.getElementById('botao-tema');
+
+function aplicarTema(tema) {
+  if (tema === 'auto') delete document.documentElement.dataset.tema;
+  else document.documentElement.dataset.tema = tema;
+
+  // Cada <meta theme-color> vale para um tema do celular; com escolha manual, os dois usam a mesma cor.
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+    const doCelular = (meta.getAttribute('media') || '').includes('dark') ? 'escuro' : 'claro';
+    meta.content = CORES_BARRA[tema === 'auto' ? doCelular : tema];
+  });
+
+  botaoTema.textContent = ROTULOS_TEMA[tema];
+  botaoTema.setAttribute('aria-label', `Tema: ${ROTULOS_TEMA[tema].slice(2)}. Toque para trocar.`);
+}
+
+let temaAtual = TEMAS.includes(localStorage.getItem(CHAVE_TEMA)) ? localStorage.getItem(CHAVE_TEMA) : 'auto';
+aplicarTema(temaAtual);
+
+botaoTema.addEventListener('click', () => {
+  temaAtual = TEMAS[(TEMAS.indexOf(temaAtual) + 1) % TEMAS.length];
+  localStorage.setItem(CHAVE_TEMA, temaAtual);
+  aplicarTema(temaAtual);
+});
+
 // ---------- Conta e nuvem ----------
 const CHAVE_NUVEM = 'demandas.usaNuvem'; // lembra que este aparelho está logado na nuvem
 const conta = document.getElementById('conta');

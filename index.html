@@ -11,12 +11,22 @@
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="icon" href="./icons/icon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <script>
+    // Aplica o tema escolhido antes de desenhar a página, para não piscar a cor errada.
+    try {
+      const tema = localStorage.getItem('demandas.tema');
+      if (tema === 'claro' || tema === 'escuro') document.documentElement.dataset.tema = tema;
+    } catch {}
+  </script>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
   <header class="topo">
-    <h1>Demandas</h1>
+    <div class="topo-linha">
+      <h1>Demandas</h1>
+      <button type="button" id="botao-tema" class="botao-tema"></button>
+    </div>
     <div class="conta" id="conta"></div>
     <dl class="resumo">
       <div class="resumo-item">
