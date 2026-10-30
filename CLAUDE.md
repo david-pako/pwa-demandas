@@ -75,6 +75,11 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
 - Armazenamento: **localStorage**, chave `demandas.tarefas`. Código separado em `dados.js`
   (leitura, gravação e validação) e `app.js` (tela), usando módulos ES nativos.
 - Textos das tarefas entram na tela só com `textContent`, nunca com `innerHTML`.
+- Atualização do app: o service worker novo **não** usa `skipWaiting` no install. Ele espera
+  até a pessoa tocar em "Atualizar" (mensagem `{ tipo: 'atualizar' }`); a página recarrega no
+  `controllerchange`. Ao voltar para o app (`visibilitychange`), ele procura versão nova.
+- Cores definidas com `light-dark()`; o tema (auto/claro/escuro) muda só o `color-scheme`
+  via `data-tema` no `<html>`. Um script inline no `<head>` aplica o tema salvo antes da pintura.
 
 ## Regras de comportamento
 
@@ -84,6 +89,9 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
 - O campo rápido cria a tarefa na aba aberta, no grupo **"Entrada"** (exibido sempre primeiro),
   com tag `next` e status `aberto`.
 - Ao mudar de aba ou de grupo na edição, a tarefa vai para o fim do grupo novo.
+- Setas ↑ e ↓ nas tarefas abertas trocam a tarefa com a vizinha e renumeram as abertas do
+  grupo (1, 2, 3...), gravando só as que mudaram.
+- Botão de tema no topo alterna Automático → Claro → Escuro (chave `demandas.tema`).
 - Importar **substitui** todas as tarefas do aparelho, após confirmação. Se qualquer item for
   inválido, nada é importado e os erros são mostrados. Campos opcionais ausentes recebem padrão.
 - Antes de importar, o app guarda uma cópia das tarefas atuais (chave `demandas.antesDaImportacao`)
