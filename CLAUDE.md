@@ -126,3 +126,17 @@ Regras técnicas da v2:
   Quem protege os dados são as regras de segurança.
 - **Privacidade:** com login, as tarefas reais ficam no Firebase (Google), não no repositório.
   A regra de nunca colocar tarefas reais no código continua valendo.
+- SDK do Firebase fixado na versão **13.1.0** (URLs do gstatic em `nuvem.js` e `sw.js`).
+  Ao trocar de versão, mudar nos dois arquivos.
+- Campo interno `criadoEm` (marca de tempo crescente) guarda a ordem de criação, que o Firestore
+  não preserva. Não entra no JSON exportado.
+
+Comportamento da v2:
+
+- Sem login: tudo como na v1 (localStorage). O topo mostra "Entrar com Google".
+- Com login: tarefas em `usuarios/{uid}/tarefas`, com cache offline do Firestore. O topo mostra
+  o e-mail, o estado (Sincronizado / Offline / Enviando mudanças…) e "Sair".
+- Primeiro login de uma conta em cada aparelho: pergunta se envia as tarefas locais para a conta
+  (marca `demandas.enviado.{uid}` no localStorage para não perguntar de novo).
+- Sair: as tarefas continuam na nuvem; o aparelho volta a mostrar as tarefas locais de antes do login.
+- Importar com login substitui as tarefas da conta (em todos os aparelhos).

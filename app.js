@@ -1,5 +1,5 @@
 import {
-  criarArmazenamentoLocal, novaTarefa, paraExportar, validarLista, TAGS,
+  criarArmazenamentoLocal, carregar, novaTarefa, paraExportar, validarLista, TAGS,
   guardarCopia, lerCopia, apagarCopia,
 } from './dados.js';
 
@@ -355,6 +355,25 @@ conta.addEventListener('click', async (evento) => {
   }
 });
 
+// Primeiro login nesta conta, neste aparelho: oferece enviar as tarefas locais.
+// Uma marca no aparelho evita perguntar de novo a cada abertura.
+async function enviarTarefasDoAparelho(uid, armazenamentoNuvem) {
+  const marca = `demandas.enviado.${uid}`;
+  if (localStorage.getItem(marca)) return;
+
+  const locais = carregar();
+  if (locais.length > 0) {
+    const naConta = await armazenamentoNuvem.contar();
+    const pergunta = naConta === 0
+      ? `Enviar as ${locais.length} tarefa(s) deste aparelho para a sua conta?`
+        + ' (Se forem só as tarefas de exemplo, toque em Cancelar.)'
+      : `Sua conta já tem ${naConta} tarefa(s). Juntar com as ${locais.length} deste aparelho?`
+        + ' (Cancelar: usar só as da conta.)';
+    if (confirm(pergunta)) await armazenamentoNuvem.enviar(locais);
+  }
+  localStorage.setItem(marca, 'sim');
+}
+
 // Carrega o Firebase sem travar o app: se falhar, tudo continua funcionando no aparelho.
 async function iniciarNuvem() {
   try {
@@ -374,7 +393,13 @@ async function iniciarNuvem() {
     estadoSync = '';
     if (novoUsuario) {
       localStorage.setItem(CHAVE_NUVEM, novoUsuario.uid);
-      usar(nuvem.criarArmazenamentoNuvem(novoUsuario.uid, mostrarErroNuvem));
+      const armazenamentoNuvem = nuvem.criarArmazenamentoNuvem(novoUsuario.uid, mostrarErroNuvem);
+      try {
+        await enviarTarefasDoAparelho(novoUsuario.uid, armazenamentoNuvem);
+      } catch (erro) {
+        mostrarErroNuvem(erro); // sem marca: pergunta de novo na próxima abertura
+      }
+      usar(armazenamentoNuvem);
     } else {
       localStorage.removeItem(CHAVE_NUVEM);
       usar(criarArmazenamentoLocal());
