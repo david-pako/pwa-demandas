@@ -186,6 +186,18 @@ button, input { font: inherit; color: inherit; }
 
 .selo { border: 1px solid var(--borda); color: var(--texto-suave); }
 
+/* Prazo: neutro; amarelo quando vence hoje/amanhã; vermelho quando atrasado */
+.prazo {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--borda);
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.prazo-perto { border-color: transparent; background: var(--tag-wait); color: var(--tag-wait-texto); }
+.prazo-atrasado { border-color: transparent; background: light-dark(#fee2e2, #4c1d1d); color: light-dark(#991b1b, #fecaca); }
+
 /* Tarefas fechadas: apagadas e riscadas */
 .status-feito, .status-encerrado { opacity: 0.7; }
 .status-feito .tarefa-titulo,

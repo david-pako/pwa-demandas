@@ -54,6 +54,35 @@ function proximaOrdem(aba, grupo) {
   return ordens.length > 0 ? Math.max(...ordens) + 1 : 1;
 }
 
+// ---------- Prazos ----------
+const hoje = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD na data local
+
+// Dias entre hoje e o prazo (negativo = atrasado). Usa UTC só para não sofrer com horário de verão.
+function diasAte(prazo) {
+  const paraDia = (data) => {
+    const [ano, mes, dia] = data.split('-').map(Number);
+    return Date.UTC(ano, mes - 1, dia) / 86400000;
+  };
+  return paraDia(prazo) - paraDia(hoje());
+}
+
+// Etiqueta do prazo: "Atrasada · 28/10", "Vence hoje", "Em 3 dias · 04/11", "15/11"...
+function etiquetaPrazo(t) {
+  if (!t.prazo) return null;
+  const [ano, mes, dia] = t.prazo.split('-');
+  const data = `${dia}/${mes}` + (ano === hoje().slice(0, 4) ? '' : `/${ano}`);
+  let texto = `Prazo ${data}`;
+  let classe = 'prazo';
+  if (t.status === 'aberto') {
+    const dias = diasAte(t.prazo);
+    if (dias < 0) { texto = `Atrasada · ${data}`; classe += ' prazo-atrasado'; }
+    else if (dias === 0) { texto = 'Vence hoje'; classe += ' prazo-perto'; }
+    else if (dias === 1) { texto = 'Vence amanhã'; classe += ' prazo-perto'; }
+    else if (dias <= 7) texto = `Em ${dias} dias · ${data}`;
+  }
+  return el('span', { className: classe, textContent: texto });
+}
+
 // ---------- Desenho da tela ----------
 function render() {
   renderConta();
@@ -130,6 +159,7 @@ function renderTarefa(t, primeira = false, ultima = false) {
   const item = el('li', { className: `tarefa status-${t.status}` },
     el('div', { className: 'tarefa-cabeca' },
       el('span', { className: `tag tag-${t.tag}`, textContent: t.tagTexto || TAGS[t.tag] }),
+      etiquetaPrazo(t),
       t.status === 'aberto' ? null : el('span', { className: 'selo', textContent: t.status === 'feito' ? 'Feito' : 'Encerrado' }),
     ),
     el('p', { className: 'tarefa-titulo', textContent: t.titulo }),
@@ -167,7 +197,7 @@ function botoesDa(t, primeira, ultima) {
 // ---------- Edição ----------
 const dialogo = document.getElementById('dialogo');
 const formEditar = document.getElementById('form-editar');
-const CAMPOS_EDITAVEIS = ['titulo', 'desc', 'aba', 'grupo', 'tag', 'tagTexto'];
+const CAMPOS_EDITAVEIS = ['titulo', 'desc', 'aba', 'grupo', 'tag', 'tagTexto', 'prazo'];
 let emEdicao = null; // a tarefa aberta no diálogo
 
 // Sugestões do campo Grupo: os grupos que já existem na aba escolhida.
@@ -180,13 +210,18 @@ function preencherGrupos(aba) {
 function abrirEdicao(tarefa) {
   emEdicao = tarefa;
   for (const campo of CAMPOS_EDITAVEIS) {
-    formEditar.elements[campo].value = tarefa[campo];
+    formEditar.elements[campo].value = tarefa[campo] ?? ''; // tarefas antigas não têm prazo
   }
   preencherGrupos(tarefa.aba);
   dialogo.showModal();
 }
 
 // ---------- Eventos ----------
+// Ao voltar para o app (talvez em outro dia), redesenha para atualizar "Vence hoje", "Atrasada"...
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && armazenamento) render();
+});
+
 document.querySelector('.abas').addEventListener('click', (evento) => {
   const botao = evento.target.closest('.aba');
   if (!botao) return;
