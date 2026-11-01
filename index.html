@@ -56,6 +56,21 @@
       <button type="submit">Adicionar</button>
     </form>
 
+    <div class="controles">
+      <label class="controle-ordem">Ordem
+        <select id="ordem">
+          <option value="manual">Minha ordem</option>
+          <option value="prazo">Prazo (mais perto)</option>
+          <option value="alfabetica">A–Z</option>
+          <option value="recentes">Mais recentes</option>
+          <option value="antigas">Mais antigas</option>
+        </select>
+      </label>
+      <label class="controle-agrupar">
+        <input type="checkbox" id="agrupar" checked> Agrupar
+      </label>
+    </div>
+
     <section id="lista" class="lista"></section>
 
     <footer class="backup">

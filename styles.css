@@ -122,6 +122,33 @@ button, input { font: inherit; color: inherit; }
   cursor: pointer;
 }
 
+/* ---------- Ordem e agrupamento ---------- */
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.controles label { display: flex; align-items: center; gap: 8px; }
+
+.controles select {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+}
+
+.controle-agrupar { min-height: 40px; cursor: pointer; }
+.controle-agrupar input { width: 20px; height: 20px; margin: 0; accent-color: var(--destaque); }
+
 .vazio { color: var(--texto-suave); text-align: center; margin-top: 32px; }
 
 /* ---------- Grupos e tarefas ---------- */

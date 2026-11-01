@@ -26,6 +26,24 @@ function el(tag, props = {}, ...filhos) {
 
 const porOrdem = (a, b) => a.ordem - b.ordem;
 
+// ---------- Ordenação ----------
+const CHAVE_ORDEM = 'demandas.ordem';
+const CHAVE_AGRUPAR = 'demandas.agrupar';
+const SEM_PRAZO = '9999-12-31'; // sem prazo vai para o fim na ordem por prazo
+
+// Cada opção do seletor "Ordem" é uma função de comparação para o sort().
+// Empates seguem a ordem manual (setas).
+const ORDENS = {
+  manual: porOrdem,
+  prazo: (a, b) => (a.prazo || SEM_PRAZO).localeCompare(b.prazo || SEM_PRAZO) || porOrdem(a, b),
+  alfabetica: (a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR', { sensitivity: 'base', numeric: true }) || porOrdem(a, b),
+  recentes: (a, b) => (b.criadoEm ?? 0) - (a.criadoEm ?? 0) || porOrdem(a, b),
+  antigas: (a, b) => (a.criadoEm ?? 0) - (b.criadoEm ?? 0) || porOrdem(a, b),
+};
+
+let ordemAtual = Object.hasOwn(ORDENS, localStorage.getItem(CHAVE_ORDEM)) ? localStorage.getItem(CHAVE_ORDEM) : 'manual';
+let agrupar = localStorage.getItem(CHAVE_AGRUPAR) !== 'nao';
+
 // Grupos da aba na ordem em que aparecem; o grupo do campo rápido vem sempre primeiro.
 function gruposDaAba(aba) {
   const grupos = [...new Set(tarefas.filter((t) => t.aba === aba).map((t) => t.grupo))];
@@ -124,20 +142,36 @@ function renderLista() {
     lista.replaceChildren(el('p', { className: 'vazio', textContent: 'Nenhuma tarefa por aqui ainda.' }));
     return;
   }
-  lista.replaceChildren(...grupos.map(renderGrupo));
+  const daAba = tarefas.filter((t) => t.aba === abaAtual);
+
+  if (agrupar) {
+    lista.replaceChildren(...grupos.map((grupo) => renderSecao(
+      grupo,
+      daAba.filter((t) => t.grupo === grupo).sort(ORDENS[ordemAtual]),
+      `grupo|${abaAtual}|${grupo}`,
+    )));
+    return;
+  }
+
+  // Sem grupos: "Minha ordem" segue a ordem dos grupos e, dentro deles, a das setas.
+  const comparar = ordemAtual === 'manual'
+    ? (a, b) => grupos.indexOf(a.grupo) - grupos.indexOf(b.grupo) || porOrdem(a, b)
+    : ORDENS[ordemAtual];
+  lista.replaceChildren(renderSecao('Todas', [...daAba].sort(comparar), `todas|${abaAtual}`, true));
 }
 
-function renderGrupo(grupo) {
-  const doGrupo = tarefas.filter((t) => t.aba === abaAtual && t.grupo === grupo).sort(porOrdem);
-  const abertas = doGrupo.filter((t) => t.status === 'aberto');
-  const fechadas = doGrupo.filter((t) => t.status !== 'aberto');
+// Uma seção da lista: abertas à mostra e fechadas recolhidas no fim.
+// mostrarGrupo: põe o nome do grupo em cada tarefa (usado na lista sem grupos).
+function renderSecao(titulo, daSecao, chave, mostrarGrupo = false) {
+  const abertas = daSecao.filter((t) => t.status === 'aberto');
+  const fechadas = daSecao.filter((t) => t.status !== 'aberto');
+  const setas = agrupar && ordemAtual === 'manual'; // ↑↓ só fazem sentido na ordem manual
 
   let blocoFechadas = null;
   if (fechadas.length > 0) {
-    const chave = `${abaAtual}|${grupo}`;
     blocoFechadas = el('details', { className: 'fechadas', open: gruposExpandidos.has(chave) },
       el('summary', { textContent: `${fechadas.length} fechada(s)` }),
-      el('ul', { className: 'tarefas' }, ...fechadas.map((t) => renderTarefa(t))),
+      el('ul', { className: 'tarefas' }, ...fechadas.map((t) => renderTarefa(t, { mostrarGrupo }))),
     );
     blocoFechadas.addEventListener('toggle', () => {
       if (blocoFechadas.open) gruposExpandidos.add(chave);
@@ -146,25 +180,28 @@ function renderGrupo(grupo) {
   }
 
   return el('section', { className: 'grupo' },
-    el('h2', { className: 'grupo-titulo' }, grupo, el('span', { className: 'contador', textContent: abertas.length })),
+    el('h2', { className: 'grupo-titulo' }, titulo, el('span', { className: 'contador', textContent: abertas.length })),
     abertas.length > 0
-      ? el('ul', { className: 'tarefas' }, ...abertas.map((t, i) => renderTarefa(t, i === 0, i === abertas.length - 1)))
+      ? el('ul', { className: 'tarefas' }, ...abertas.map((t, i) => renderTarefa(t, {
+        mostrarGrupo, setas, primeira: i === 0, ultima: i === abertas.length - 1,
+      })))
       : null,
     blocoFechadas,
   );
 }
 
-// primeira/ultima: posição entre as abertas do grupo, para desativar ↑ e ↓ nas pontas.
-function renderTarefa(t, primeira = false, ultima = false) {
+// opcoes.setas: mostra ↑↓ (primeira/ultima desativam as pontas); opcoes.mostrarGrupo: etiqueta do grupo.
+function renderTarefa(t, opcoes = {}) {
   const item = el('li', { className: `tarefa status-${t.status}` },
     el('div', { className: 'tarefa-cabeca' },
       el('span', { className: `tag tag-${t.tag}`, textContent: t.tagTexto || TAGS[t.tag] }),
       etiquetaPrazo(t),
+      opcoes.mostrarGrupo ? el('span', { className: 'selo', textContent: t.grupo }) : null,
       t.status === 'aberto' ? null : el('span', { className: 'selo', textContent: t.status === 'feito' ? 'Feito' : 'Encerrado' }),
     ),
     el('p', { className: 'tarefa-titulo', textContent: t.titulo }),
     t.desc ? el('p', { className: 'tarefa-desc', textContent: t.desc }) : null,
-    el('div', { className: 'tarefa-acoes' }, ...botoesDa(t, primeira, ultima)),
+    el('div', { className: 'tarefa-acoes' }, ...botoesDa(t, opcoes)),
   );
   item.dataset.id = t.id;
   return item;
@@ -180,16 +217,17 @@ function criarBotao(acao, texto, rotulo = '') {
   return botao;
 }
 
-function botoesDa(t, primeira, ultima) {
+function botoesDa(t, { setas = false, primeira = false, ultima = false } = {}) {
   if (t.status === 'aberto') {
-    const subir = criarBotao('subir', '↑', 'Mover para cima');
-    const descer = criarBotao('descer', '↓', 'Mover para baixo');
-    subir.disabled = primeira;
-    descer.disabled = ultima;
-    return [
-      criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar'), criarBotao('editar', 'Editar'),
-      subir, descer,
-    ];
+    const botoes = [criarBotao('feito', 'Feito'), criarBotao('encerrar', 'Encerrar'), criarBotao('editar', 'Editar')];
+    if (setas) {
+      const subir = criarBotao('subir', '↑', 'Mover para cima');
+      const descer = criarBotao('descer', '↓', 'Mover para baixo');
+      subir.disabled = primeira;
+      descer.disabled = ultima;
+      botoes.push(subir, descer);
+    }
+    return botoes;
   }
   return [criarBotao('reabrir', 'Reabrir'), criarBotao('editar', 'Editar')];
 }
@@ -217,6 +255,23 @@ function abrirEdicao(tarefa) {
 }
 
 // ---------- Eventos ----------
+const seletorOrdem = document.getElementById('ordem');
+const caixaAgrupar = document.getElementById('agrupar');
+seletorOrdem.value = ordemAtual;
+caixaAgrupar.checked = agrupar;
+
+seletorOrdem.addEventListener('change', () => {
+  ordemAtual = seletorOrdem.value;
+  localStorage.setItem(CHAVE_ORDEM, ordemAtual);
+  if (armazenamento) renderLista();
+});
+
+caixaAgrupar.addEventListener('change', () => {
+  agrupar = caixaAgrupar.checked;
+  localStorage.setItem(CHAVE_AGRUPAR, agrupar ? 'sim' : 'nao');
+  if (armazenamento) renderLista();
+});
+
 // Ao voltar para o app (talvez em outro dia), redesenha para atualizar "Vence hoje", "Atrasada"...
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && armazenamento) render();
