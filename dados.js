@@ -53,6 +53,7 @@ export function novaTarefa(campos) {
     tagTexto: '',
     status: 'aberto',
     ordem: 1,
+    prazo: '', // data no formato AAAA-MM-DD, ou vazio (sem prazo)
     ...campos,
   };
 }
@@ -134,11 +135,20 @@ export function apagarCopia() {
 // ---------- Exportação e importação ----------
 
 // Campos do formato de troca, na ordem em que aparecem no JSON.
-export const CAMPOS = ['aba', 'grupo', 'titulo', 'desc', 'tag', 'tagTexto', 'status', 'ordem'];
+export const CAMPOS = ['aba', 'grupo', 'titulo', 'desc', 'tag', 'tagTexto', 'status', 'ordem', 'prazo'];
+
+// Prazo válido: vazio ou uma data real no formato AAAA-MM-DD (ex.: 2026-11-15).
+export function prazoValido(prazo) {
+  if (prazo === '') return true;
+  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(prazo)) return false;
+  const [ano, mes, dia] = prazo.split('-').map(Number);
+  const data = new Date(ano, mes - 1, dia);
+  return data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+}
 
 // Lista pronta para exportar: só os campos do formato, sem o id interno.
 export function paraExportar(tarefas) {
-  return tarefas.map((t) => Object.fromEntries(CAMPOS.map((campo) => [campo, t[campo]])));
+  return tarefas.map((t) => Object.fromEntries(CAMPOS.map((campo) => [campo, t[campo] ?? ''])));
 }
 
 const comoTexto = (valor) => (valor === undefined || valor === null ? '' : String(valor).trim());
@@ -158,6 +168,7 @@ function validarTarefa(item, numero) {
     tagTexto: comoTexto(item.tagTexto),
     status: comoTexto(item.status).toLowerCase() || 'aberto',
     ordem: comoTexto(item.ordem) === '' ? numero : Number(item.ordem),
+    prazo: comoTexto(item.prazo),
   };
 
   if (!ABAS.includes(tarefa.aba)) {
@@ -174,6 +185,9 @@ function validarTarefa(item, numero) {
   }
   if (!Number.isFinite(tarefa.ordem)) {
     return { erro: `Item ${numero}: ordem "${comoTexto(item.ordem)}" não é um número.` };
+  }
+  if (!prazoValido(tarefa.prazo)) {
+    return { erro: `Item ${numero}: prazo "${tarefa.prazo}" inválido (use AAAA-MM-DD, ex.: 2026-11-15, ou deixe vazio).` };
   }
   return { tarefa: novaTarefa(tarefa) };
 }
