@@ -47,6 +47,7 @@ Cada tarefa tem os campos:
 | `tagTexto` | texto  | rótulo exibido para a tag (pode ser vazio)        |
 | `status`   | texto  | `aberto`, `feito` ou `encerrado`                  |
 | `ordem`    | número | posição da tarefa dentro do grupo                 |
+| `prazo`    | texto  | data `AAAA-MM-DD` ou vazio (opcional)             |
 
 Formato de exportação/importação: **uma lista (array JSON) de tarefas com os campos acima**.
 
@@ -60,7 +61,8 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
     "tag": "next",
     "tagTexto": "Próximo",
     "status": "aberto",
-    "ordem": 1
+    "ordem": 1,
+    "prazo": "2026-11-15"
   }
 ]
 ```
@@ -91,6 +93,15 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
 - Ao mudar de aba ou de grupo na edição, a tarefa vai para o fim do grupo novo.
 - Setas ↑ e ↓ nas tarefas abertas trocam a tarefa com a vizinha e renumeram as abertas do
   grupo (1, 2, 3...), gravando só as que mudaram.
+- Prazo: só data (sem hora), campo `<input type="date">` na janela da tarefa. Etiqueta na tarefa
+  aberta: "Atrasada" (vermelho), "Vence hoje"/"Vence amanhã" (amarelo), "Em N dias" (até 7) ou a data.
+  A tela redesenha ao voltar para o app (`visibilitychange`), para a etiqueta mudar de dia.
+- Seletor **Ordem** (chave `demandas.ordem`): Minha ordem (`manual`), Prazo (sem prazo vai para o fim),
+  A–Z, Mais recentes e Mais antigas (pelo `criadoEm`). Empates seguem a ordem manual.
+- Caixa **Agrupar** (chave `demandas.agrupar`): desmarcada, a aba vira uma lista só, com o grupo como etiqueta.
+  Setas ↑↓ só aparecem em "Minha ordem" com "Agrupar" marcado.
+- Botão **Opções** ao lado do campo rápido: abre a janela da tarefa em modo "Nova tarefa" (título já
+  preenchido, aba atual, grupo "Entrada"); a tarefa vai para o fim do grupo escolhido.
 - Botão de tema no topo alterna Automático → Claro → Escuro (chave `demandas.tema`).
 - Importar **substitui** todas as tarefas do aparelho, após confirmação. Se qualquer item for
   inválido, nada é importado e os erros são mostrados. Campos opcionais ausentes recebem padrão.
@@ -148,3 +159,6 @@ Comportamento da v2:
   (marca `demandas.enviado.{uid}` no localStorage para não perguntar de novo).
 - Sair: as tarefas continuam na nuvem; o aparelho volta a mostrar as tarefas locais de antes do login.
 - Importar com login substitui as tarefas da conta (em todos os aparelhos).
+- Cada conta Google tem a sua lista separada (ex.: outra pessoa da casa usa o mesmo app com a conta dela).
+  Lista compartilhada entre contas não existe (decidido em 01/11/2026).
+- Ao mudar o `firestore.rules`, colar a versão nova no console do Firebase **antes** de publicar o app.

@@ -1,7 +1,7 @@
 // Service worker: guarda os arquivos do app no aparelho para funcionar offline.
 // IMPORTANTE: ao alterar qualquer arquivo do app, incremente VERSAO
 // para que os aparelhos baixem a versão nova.
-const VERSAO = 'v10';
+const VERSAO = 'v11';
 const CACHE = `demandas-${VERSAO}`;
 
 const ARQUIVOS = [

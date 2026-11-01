@@ -17,7 +17,8 @@
     "tag": "wait",
     "tagTexto": "Fotógrafo",
     "status": "aberto",
-    "ordem": 2
+    "ordem": 2,
+    "prazo": "2026-11-30"
   },
   {
     "aba": "projetos",
@@ -47,7 +48,8 @@
     "tag": "next",
     "tagTexto": "",
     "status": "aberto",
-    "ordem": 1
+    "ordem": 1,
+    "prazo": "2026-11-08"
   },
   {
     "aba": "pessoal",
