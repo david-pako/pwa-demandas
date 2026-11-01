@@ -149,6 +149,14 @@ button, input { font: inherit; color: inherit; }
 .controle-agrupar { min-height: 40px; cursor: pointer; }
 .controle-agrupar input { width: 20px; height: 20px; margin: 0; accent-color: var(--destaque); }
 
+.rapido .botao-opcoes {
+  padding: 0 12px;
+  border: 1px solid var(--borda);
+  background: var(--superficie);
+  color: var(--texto);
+  font-weight: 400;
+}
+
 .vazio { color: var(--texto-suave); text-align: center; margin-top: 32px; }
 
 /* ---------- Grupos e tarefas ---------- */
@@ -298,7 +306,7 @@ button, input { font: inherit; color: inherit; }
 
 .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.dialogo-acoes { display: flex; gap: 8px; margin-top: 4px; }
+.dialogo-acoes { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 
 .dialogo-acoes button {
   min-height: 44px;

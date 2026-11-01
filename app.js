@@ -236,7 +236,7 @@ function botoesDa(t, { setas = false, primeira = false, ultima = false } = {}) {
 const dialogo = document.getElementById('dialogo');
 const formEditar = document.getElementById('form-editar');
 const CAMPOS_EDITAVEIS = ['titulo', 'desc', 'aba', 'grupo', 'tag', 'tagTexto', 'prazo'];
-let emEdicao = null; // a tarefa aberta no diálogo
+let emEdicao = null; // a tarefa aberta no diálogo; null quando está criando uma nova
 
 // Sugestões do campo Grupo: os grupos que já existem na aba escolhida.
 function preencherGrupos(aba) {
@@ -245,13 +245,28 @@ function preencherGrupos(aba) {
   );
 }
 
-function abrirEdicao(tarefa) {
-  emEdicao = tarefa;
+// O mesmo diálogo serve para editar (tarefa existente) e para criar (botão "Opções").
+function abrirDialogo(tarefa, criando) {
+  emEdicao = criando ? null : tarefa;
   for (const campo of CAMPOS_EDITAVEIS) {
     formEditar.elements[campo].value = tarefa[campo] ?? ''; // tarefas antigas não têm prazo
   }
+  document.getElementById('dialogo-titulo').textContent = criando ? 'Nova tarefa' : 'Editar tarefa';
+  document.getElementById('botao-excluir').hidden = criando;
+  document.getElementById('botao-salvar').textContent = criando ? 'Adicionar' : 'Salvar';
   preencherGrupos(tarefa.aba);
   dialogo.showModal();
+}
+
+const abrirEdicao = (tarefa) => abrirDialogo(tarefa, false);
+
+// Nova tarefa já com o que foi digitado no campo rápido e os mesmos padrões dele.
+function abrirCriacao() {
+  abrirDialogo({
+    titulo: campoRapido.value.trim(), desc: '', aba: abaAtual, grupo: GRUPO_RAPIDO,
+    tag: 'next', tagTexto: '', prazo: '',
+  }, true);
+  formEditar.elements.titulo.focus();
 }
 
 // ---------- Eventos ----------
@@ -299,6 +314,10 @@ document.getElementById('form-rapido').addEventListener('submit', (evento) => {
   campoRapido.value = '';
 });
 
+document.getElementById('botao-opcoes').addEventListener('click', () => {
+  if (armazenamento) abrirCriacao();
+});
+
 // Delegação de eventos: um só ouvinte na lista atende os botões de todas as tarefas.
 lista.addEventListener('click', (evento) => {
   const botao = evento.target.closest('button[data-acao]');
@@ -326,6 +345,13 @@ formEditar.addEventListener('submit', (evento) => {
     campos[campo] = formEditar.elements[campo].value.trim();
   }
   if (!campos.titulo || !campos.grupo) return;
+
+  if (!emEdicao) { // criando pelo botão "Opções": vai para o fim do grupo escolhido
+    dialogo.close();
+    armazenamento.adicionar(novaTarefa({ ...campos, ordem: proximaOrdem(campos.aba, campos.grupo) }));
+    campoRapido.value = '';
+    return;
+  }
 
   // Mudou de aba ou de grupo: vai para o fim do grupo novo.
   if (campos.aba !== emEdicao.aba || campos.grupo !== emEdicao.grupo) {
