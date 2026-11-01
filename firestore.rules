@@ -28,7 +28,8 @@ service cloud.firestore {
         && t.status in ['aberto', 'feito', 'encerrado']
         && t.ordem is number
         && t.criadoEm is number
-        // prazo é opcional (tarefas antigas não têm): vazio ou AAAA-MM-DD
+        // prazo é opcional (tarefas antigas não têm): vazio ou data.
+        // Gravado como AAAA-MM-DD (para ordenar); a tela e o JSON mostram DD-MM-AAAA.
         && (!('prazo' in t) || (t.prazo is string
               && (t.prazo == '' || t.prazo.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'))));
     }

@@ -53,7 +53,7 @@ export function novaTarefa(campos) {
     tagTexto: '',
     status: 'aberto',
     ordem: 1,
-    prazo: '', // data no formato AAAA-MM-DD, ou vazio (sem prazo)
+    prazo: '', // guardado como AAAA-MM-DD (veja "Datas" abaixo), ou vazio (sem prazo)
     ...campos,
   };
 }
@@ -137,18 +137,38 @@ export function apagarCopia() {
 // Campos do formato de troca, na ordem em que aparecem no JSON.
 export const CAMPOS = ['aba', 'grupo', 'titulo', 'desc', 'tag', 'tagTexto', 'status', 'ordem', 'prazo'];
 
-// Prazo válido: vazio ou uma data real no formato AAAA-MM-DD (ex.: 2026-11-15).
-export function prazoValido(prazo) {
-  if (prazo === '') return true;
-  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(prazo)) return false;
-  const [ano, mes, dia] = prazo.split('-').map(Number);
-  const data = new Date(ano, mes - 1, dia);
-  return data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+// ---------- Datas ----------
+// Por dentro, o prazo fica como AAAA-MM-DD: é o formato do campo de data do navegador
+// e, nele, ordenar o texto já ordena as datas. Para a pessoa, aparece como DD-MM-AAAA.
+
+// "2026-11-15" -> "15-11-2026"
+export function dataBrasileira(iso) {
+  if (!iso) return '';
+  const [ano, mes, dia] = iso.split('-');
+  return `${dia}-${mes}-${ano}`;
 }
 
-// Lista pronta para exportar: só os campos do formato, sem o id interno.
+// Lê DD-MM-AAAA, DD/MM/AAAA ou AAAA-MM-DD.
+// Devolve AAAA-MM-DD, '' (sem data) ou null (data inválida, ex.: 31-02-2026).
+export function lerData(texto) {
+  if (texto === '') return '';
+  const brasileira = /^([0-9]{2})[-/]([0-9]{2})[-/]([0-9]{4})$/.exec(texto);
+  const iso = brasileira
+    ? `${brasileira[3]}-${brasileira[2]}-${brasileira[1]}`
+    : (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(texto) ? texto : null);
+  if (!iso) return null;
+  const [ano, mes, dia] = iso.split('-').map(Number);
+  const data = new Date(ano, mes - 1, dia);
+  const existe = data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+  return existe ? iso : null;
+}
+
+// Lista pronta para exportar: só os campos do formato, sem o id interno, com o prazo em DD-MM-AAAA.
 export function paraExportar(tarefas) {
-  return tarefas.map((t) => Object.fromEntries(CAMPOS.map((campo) => [campo, t[campo] ?? ''])));
+  return tarefas.map((t) => ({
+    ...Object.fromEntries(CAMPOS.map((campo) => [campo, t[campo] ?? ''])),
+    prazo: dataBrasileira(t.prazo),
+  }));
 }
 
 const comoTexto = (valor) => (valor === undefined || valor === null ? '' : String(valor).trim());
@@ -168,7 +188,7 @@ function validarTarefa(item, numero) {
     tagTexto: comoTexto(item.tagTexto),
     status: comoTexto(item.status).toLowerCase() || 'aberto',
     ordem: comoTexto(item.ordem) === '' ? numero : Number(item.ordem),
-    prazo: comoTexto(item.prazo),
+    prazo: lerData(comoTexto(item.prazo)),
   };
 
   if (!ABAS.includes(tarefa.aba)) {
@@ -186,8 +206,8 @@ function validarTarefa(item, numero) {
   if (!Number.isFinite(tarefa.ordem)) {
     return { erro: `Item ${numero}: ordem "${comoTexto(item.ordem)}" não é um número.` };
   }
-  if (!prazoValido(tarefa.prazo)) {
-    return { erro: `Item ${numero}: prazo "${tarefa.prazo}" inválido (use AAAA-MM-DD, ex.: 2026-11-15, ou deixe vazio).` };
+  if (tarefa.prazo === null) {
+    return { erro: `Item ${numero}: prazo "${comoTexto(item.prazo)}" inválido (use DD-MM-AAAA, ex.: 15-11-2026, ou deixe vazio).` };
   }
   return { tarefa: novaTarefa(tarefa) };
 }

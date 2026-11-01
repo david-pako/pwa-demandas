@@ -1,5 +1,5 @@
 import {
-  criarArmazenamentoLocal, carregar, novaTarefa, paraExportar, validarLista, TAGS,
+  criarArmazenamentoLocal, carregar, novaTarefa, paraExportar, validarLista, TAGS, dataBrasileira,
   guardarCopia, lerCopia, apagarCopia,
 } from './dados.js';
 
@@ -84,11 +84,10 @@ function diasAte(prazo) {
   return paraDia(prazo) - paraDia(hoje());
 }
 
-// Etiqueta do prazo: "Atrasada · 28/10", "Vence hoje", "Em 3 dias · 04/11", "15/11"...
+// Etiqueta do prazo: "Atrasada · 28-10-2026", "Vence hoje", "Em 3 dias · 04-11-2026"...
 function etiquetaPrazo(t) {
   if (!t.prazo) return null;
-  const [ano, mes, dia] = t.prazo.split('-');
-  const data = `${dia}/${mes}` + (ano === hoje().slice(0, 4) ? '' : `/${ano}`);
+  const data = dataBrasileira(t.prazo);
   let texto = `Prazo ${data}`;
   let classe = 'prazo';
   if (t.status === 'aberto') {
@@ -373,8 +372,7 @@ document.getElementById('botao-excluir').addEventListener('click', () => {
 document.getElementById('botao-exportar').addEventListener('click', () => {
   const json = JSON.stringify(paraExportar(tarefas), null, 2);
   const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-  const hoje = new Date().toLocaleDateString('sv-SE'); // formato AAAA-MM-DD na data local
-  el('a', { href: url, download: `demandas-${hoje}.json` }).click();
+  el('a', { href: url, download: `demandas-${dataBrasileira(hoje())}.json` }).click(); // demandas-DD-MM-AAAA.json
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 

@@ -47,7 +47,7 @@ Cada tarefa tem os campos:
 | `tagTexto` | texto  | rótulo exibido para a tag (pode ser vazio)        |
 | `status`   | texto  | `aberto`, `feito` ou `encerrado`                  |
 | `ordem`    | número | posição da tarefa dentro do grupo                 |
-| `prazo`    | texto  | data `AAAA-MM-DD` ou vazio (opcional)             |
+| `prazo`    | texto  | data `DD-MM-AAAA` ou vazio (opcional)             |
 
 Formato de exportação/importação: **uma lista (array JSON) de tarefas com os campos acima**.
 
@@ -62,7 +62,7 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
     "tagTexto": "Próximo",
     "status": "aberto",
     "ordem": 1,
-    "prazo": "2026-11-15"
+    "prazo": "15-11-2026"
   }
 ]
 ```
@@ -109,7 +109,10 @@ Formato de exportação/importação: **uma lista (array JSON) de tarefas com os
   e mostra o botão **"Desfazer importação"**. Só o estado anterior à última importação é guardado;
   desfazer restaura a cópia e a apaga.
 - O campo de importação não usa `accept`: no Android ele bloqueia arquivos válidos (ex.: JSON salvo como .txt).
-- Exportar gera `demandas-AAAA-MM-DD.json` sem o `id` interno.
+- Exportar gera `demandas-DD-MM-AAAA.json` sem o `id` interno.
+- **Datas sempre em DD-MM-AAAA para a pessoa** (etiquetas, JSON, nome do arquivo). Por dentro (aparelho
+  e Firestore) o prazo fica `AAAA-MM-DD`, formato do `<input type="date">` e que ordena como texto.
+  A importação aceita DD-MM-AAAA, DD/MM/AAAA e AAAA-MM-DD. Conversões em `dados.js` (`dataBrasileira`, `lerData`).
 - Arquivo de exemplo para testar importação: `exemplos/tarefas-exemplo.json` (dados fictícios).
 
 ## Publicação
