@@ -11,6 +11,7 @@ App para acompanhar demandas pessoais pelo celular. O dono do projeto quer **apr
   Nunca usar o e-mail pessoal.
 - Fim de linha LF (garantido pelo `.gitattributes`).
 - v1 e v2 concluídas e testadas no celular e no computador (v2 em 30/10/2026).
+- Prazo, ordenação, agrupamento e botão Opções testados no celular em 01/11/2026.
 
 ## Privacidade (repositório público)
 
